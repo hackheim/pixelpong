@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+</head>
+<body>
+<script language="javascript" type="text/javascript">
+  var wsUri = "ws://localhost:4432/";
+  var output;
+  var width = 0;
+  var height = 0;
+  var canvas;
+  var ctx;
+  var frameCounter = 0;
+
+  function init() {
+    output = document.getElementById("output");
+    canvas = document.getElementById("canvas");
+    ctx = canvas.getContext("2d");
+
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(0, 0, 500, 300);
+    testWebSocket();
+  }
+
+  function testWebSocket() {
+    websocket = new WebSocket(wsUri);
+    websocket.onopen = function(evt) { onOpen(evt) };
+    websocket.onclose = function(evt) { onClose(evt) };
+    websocket.onmessage = function(evt) { onMessage(evt) };
+    websocket.onerror = function(evt) { onError(evt) };
+  }
+
+  function onOpen(evt) {
+    writeToScreen("CONNECTED: " + evt);
+    doSend('HELLO!');
+  }
+
+  function onClose(evt) {
+    writeToScreen("DISCONNECTED: " + evt);
+  }
+
+  function onMessage(evt) {
+    var message = JSON.parse(evt.data);
+    if (message.frameInfo) {
+      width = message.frameInfo.width;
+      height = message.frameInfo.height;
+      writeToScreen('<span style="color: blue;">Frame Info: ' + message.frameInfo.width + 'x' + message.frameInfo.height + '</span>');
+    }
+    if (message.frame) {
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, 500, 300);
+      ctx.fillStyle = '#ffffff';
+      for (var y = 0; y < height; ++y) {
+        for (var x = 0; x < width; ++x) {
+          var ix = (y * width) + x;
+          if (message.frame[ix]) {
+            ctx.fillRect(x * 10, y * 10, 10, 10);
+          }
+        }
+      }
+    }
+    //writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data+'</span>');
+    //websocket.close();
+  }
+
+  function onError(evt) {
+    writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+  }
+
+  function doSend(message) {
+    writeToScreen("SENT: " + message);
+    websocket.send(message);
+  }
+
+  function replaceOutput(message) {
+    output.innerHTML = message;
+  }
+
+  function writeToScreen(message) {
+    var pre = document.createElement("p");
+    pre.style.wordWrap = "break-word";
+    pre.innerHTML = message;
+    output.appendChild(pre);
+  }
+
+  window.addEventListener("load", init, false);
+</script>
+
+<canvas width="500" height="300" id="canvas"></canvas>
+<div id="output"></div>
+
+</body>
+</html>
