@@ -29,7 +29,7 @@ class OffscreenFrameBuffer implements FrameBuffer
         $this->width = $width;
         $this->height = $height;
         $this->frameBufferSize = $width * $height;
-        $this->setBlankFrame(\SplFixedArray::fromArray(array_fill(0, $this->frameBufferSize, 0)));
+        $this->setBackgroundFrame(\SplFixedArray::fromArray(array_fill(0, $this->frameBufferSize, 0)));
         $this->newFrame();
     }
 
@@ -110,7 +110,7 @@ class OffscreenFrameBuffer implements FrameBuffer
      * @param \SplFixedArray $frame
      * @return mixed
      */
-    public function setBlankFrame(\SplFixedArray $frame)
+    public function setBackgroundFrame(\SplFixedArray $frame)
     {
         $this->blankFrame = $frame;
     }

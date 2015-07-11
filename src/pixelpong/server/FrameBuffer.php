@@ -30,8 +30,11 @@ interface FrameBuffer
     public function getAndSwitchFrame();
 
     /**
+     * Set the background frame, which is the one the frame buffer reverts to for every
+     * game loop.
+     *
      * @param \SplFixedArray $frame
      * @return mixed
      */
-    public function setBlankFrame(\SplFixedArray $frame);
+    public function setBackgroundFrame(\SplFixedArray $frame);
 }

@@ -70,7 +70,10 @@ class PressStartToPlayGameLoop implements GameLoop
     private $frameBuffer;
 
     /** @var \SplFixedArray */
-    private $pressPlayFrame;
+    private $pressStartFrame;
+
+    /** @var \SplFixedArray */
+    private $toPlayFrame;
 
     /** @var int */
     private $previousTime;
@@ -83,8 +86,13 @@ class PressStartToPlayGameLoop implements GameLoop
     public function __construct(FrameBuffer $frameBuffer)
     {
         $this->frameBuffer = $frameBuffer;
-        $this->pressStartFrame = $this->stringToFrame(self::$PRESS_START);
-        $this->toPlayFrame = $this->stringToFrame(self::$TO_PLAY);
+//        $this->pressStartFrame = $this->stringToFrame(self::$PRESS_START);
+//        $this->toPlayFrame = $this->stringToFrame(self::$TO_PLAY);
+        $spriteLoader = new SpriteLoader(dirname(dirname(dirname(__DIR__))) . '/res/sprites');
+        $sprite = $spriteLoader->loadSprite('press_start');
+        $this->pressStartFrame = $sprite->getPixels();
+        $sprite = $spriteLoader->loadSprite('to_play');
+        $this->toPlayFrame = $sprite->getPixels();
     }
 
     /**
@@ -93,7 +101,7 @@ class PressStartToPlayGameLoop implements GameLoop
      */
     public function onEnter()
     {
-        $this->frameBuffer->setBlankFrame($this->pressPlayFrame);
+        $this->frameBuffer->setBackgroundFrame($this->pressStartFrame);
         $this->previousTime = time();
     }
 
@@ -103,10 +111,10 @@ class PressStartToPlayGameLoop implements GameLoop
         if ($now > $this->previousTime) {
             switch ($now % 4) {
                 case 0:
-                    $this->frameBuffer->setBlankFrame($this->pressStartFrame);
+                    $this->frameBuffer->setBackgroundFrame($this->pressStartFrame);
                     break;
                 case 2:
-                    $this->frameBuffer->setBlankFrame($this->toPlayFrame);
+                    $this->frameBuffer->setBackgroundFrame($this->toPlayFrame);
                     break;
             }
         }
