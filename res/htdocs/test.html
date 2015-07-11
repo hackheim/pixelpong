@@ -11,7 +11,7 @@
   var width = 0;
   var height = 0;
   var canvas;
-  var ctx;
+  var ctx, pctx;
   var frameCounter = 0;
   var palette;
   var currentColor;
@@ -24,6 +24,8 @@
     ctx.fillRect(0, 0, 500, 300);
     ctx.fillRect(0, 0, 20, 20);
     ctx.fillRect(0, 0, 20, 20);
+    var pcanvas = document.getElementById('palette');
+    pctx = pcanvas.getContext('2d');
     testWebSocket();
   }
 
@@ -52,7 +54,11 @@
       width = message.frameInfo.width;
       height = message.frameInfo.height;
       palette = message.frameInfo.palette;
-      writeToScreen('<span style="color: blue;">Frame Info: ' + evt.data + '</span>');
+      for (var i = 0; i < palette.length; ++i) {
+        pctx.fillStyle = palette[i];
+        pctx.fillRect(0, i * 15, 40, 15);
+      }
+//      writeToScreen('<span style="color: blue;">Frame Info: ' + evt.data + '</span>');
     }
     if (message.frame) {
       switchToColor('#000000');
@@ -105,6 +111,7 @@
 </script>
 
 <canvas width="470" height="270" id="canvas"></canvas>
+<canvas width="40" height="240" id="palette"></canvas>
 <div style="font-family: monospace"><pre id="output"></pre></div>
 
 </body>
