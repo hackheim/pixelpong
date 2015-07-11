@@ -8,8 +8,9 @@ class AsciiFrameEncoderTest extends \PHPUnit_Framework_TestCase
 {
     const TEST_HEIGHT = 3;
     const TEST_WIDTH = 7;
+    const TEST_BLANK_ENCODED = ".......\n.......\n.......";
 
-    /** @var FrameEncoder|\PHPUnit_Framework_MockObject_MockObject */
+    /** @var FrameBuffer|\PHPUnit_Framework_MockObject_MockObject */
     private $frameBuffer;
 
     /** @var AsciiFrameEncoder */
@@ -18,24 +19,28 @@ class AsciiFrameEncoderTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->frameBuffer = $this->getMock(FrameEncoder::class);
+        $this->frameBuffer = $this->getMock(FrameBuffer::class);
         $this->frameBuffer->expects($this->any())->method('getHeight')->willReturn(self::TEST_HEIGHT);
         $this->frameBuffer->expects($this->any())->method('getWidth')->willReturn(self::TEST_WIDTH);
         $this->encoder = new AsciiFrameEncoder($this->frameBuffer);
     }
 
-    public function testEncode()
+    public function testEncodeFrame()
     {
         $num_pixels = self::TEST_WIDTH * self::TEST_HEIGHT;
         $frame = \SplFixedArray::fromArray(array_fill(0, $num_pixels, 0));
-        $this->frameBuffer->expects($this->once())->method('getFrame')->willReturn($frame);
-        $set_pixels = [2, 3, 9, 10];
-        $expected = str_repeat(AsciiFrameEncoder::ENCODED_PIXEL_OFF, $num_pixels);
-        foreach ($set_pixels as $sp) {
+        $set_pixels = [2 => 2, 3 => 3, 9 => 10, 10 => 11];
+        $expected = self::TEST_BLANK_ENCODED;
+        foreach ($set_pixels as $sp => $ep) {
             $frame[$sp] = 1;
-            $expected[$sp] = AsciiFrameEncoder::ENCODED_PIXEL_ON;
+            $expected[$ep] = AsciiFrameEncoder::ENCODED_PIXEL_ON;
         }
-        $this->assertEquals($expected, $this->encoder->encodeFrame());
+        $this->assertEquals($expected, $this->encoder->encodeFrame($frame));
+    }
+
+    public function testEncodeFrameInfo()
+    {
+        $this->assertEquals('', $this->encoder->encodeFrameInfo($this->frameBuffer));
     }
 
 }

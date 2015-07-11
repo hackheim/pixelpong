@@ -15,9 +15,6 @@ class JsonFrameEncoder implements FrameEncoder
     /** @var int */
     private $height;
 
-    /** @var int[] */
-    private $blankEncodedFrame;
-
     public function __construct(FrameBuffer $frameBuffer)
     {
         $this->width = $frameBuffer->getWidth();
@@ -27,16 +24,15 @@ class JsonFrameEncoder implements FrameEncoder
     }
 
     /**
+     * @param \SplFixedArray $frame
      * @return string
      */
     public function encodeFrame(\SplFixedArray $frame)
     {
-        $pixels = $this->blankEncodedFrame;
-        for ($y = 0; $y < $this->height; ++$y) {
-            for ($x = 0; $x < $this->width; ++$x) {
-                if ($frame[($this->width * $y) + $x] !== self::PIXEL_BG) {
-                    $pixels[$y * $x] = self::COLOR_INDEX_FG;
-                }
+        $pixels = [];
+        foreach ($frame as $ix => $color) {
+            if ($color !== self::PIXEL_BG) {
+                $pixels[(string)$ix] = self::COLOR_INDEX_FG;
             }
         }
         return json_encode([
@@ -45,6 +41,7 @@ class JsonFrameEncoder implements FrameEncoder
     }
 
     /**
+     * @param FrameBuffer $frameBuffer
      * @return string
      */
     public function encodeFrameInfo(FrameBuffer $frameBuffer)

@@ -38,6 +38,7 @@ class GameServer implements MessageComponentInterface
     public function onOpen(ConnectionInterface $conn)
     {
         $frameEncoder = new JsonFrameEncoder($this->frameBuffer);
+//        $frameEncoder = new AsciiFrameEncoder($this->frameBuffer);
         $playerConnection = new ActivePlayerPlayerConnection($frameEncoder);
         $this->connections->attach($conn, $playerConnection);
         foreach ($this->connections as $conn) {
@@ -100,6 +101,7 @@ class GameServer implements MessageComponentInterface
             if (!isset($encodedFrameCache[$key])) {
                 $encodedFrameCache[$key] = $playerConnection->getFrameEncoder()->encodeFrame($frame);
             }
+//            printf("message: %s\n", $encodedFrameCache[$key]);
             $conn->send($encodedFrameCache[$key]);
         }
     }

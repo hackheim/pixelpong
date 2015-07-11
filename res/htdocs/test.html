@@ -18,9 +18,10 @@
     output = document.getElementById("output");
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
-
     ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, 500, 300);
+    ctx.fillRect(0, 0, 20, 20);
+    ctx.fillRect(0, 0, 20, 20);
     testWebSocket();
   }
 
@@ -42,6 +43,8 @@
   }
 
   function onMessage(evt) {
+//    replaceOutput(evt.data)
+//    return;
     var message = JSON.parse(evt.data);
     if (message.frameInfo) {
       width = message.frameInfo.width;
@@ -52,14 +55,14 @@
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, 500, 300);
       ctx.fillStyle = '#ffffff';
-      for (var y = 0; y < height; ++y) {
-        for (var x = 0; x < width; ++x) {
-          var ix = (y * width) + x;
-          if (message.frame[ix]) {
-            ctx.fillRect(x * 10, y * 10, 10, 10);
-          }
-        }
+      var pixelsDrawn = 0;
+      for (var ix in message.frame) {
+        var x = ix % width;
+        var y = Math.floor(ix / width);
+        ctx.fillRect(x * 10, y * 10, 10, 10);
+        ++pixelsDrawn;
       }
+      replaceOutput(pixelsDrawn + ' pixels drawn');
     }
     //writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data+'</span>');
     //websocket.close();
@@ -88,8 +91,8 @@
   window.addEventListener("load", init, false);
 </script>
 
-<canvas width="500" height="300" id="canvas"></canvas>
-<div id="output"></div>
+<canvas width="470" height="270" id="canvas"></canvas>
+<div style="font-family: monospace"><pre id="output"></pre></div>
 
 </body>
 </html>
