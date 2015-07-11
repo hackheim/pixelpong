@@ -15,6 +15,7 @@ interface FrameEncoder
     public function encodeFrame(\SplFixedArray $frame);
 
     /**
+     * @param FrameBuffer $frameBuffer
      * @return string
      */
     public function encodeFrameInfo(FrameBuffer $frameBuffer);

@@ -32,7 +32,7 @@ class JsonFrameEncoderTest extends \PHPUnit_Framework_TestCase
         $expected = ['frame' => []];
         foreach ($set_pixels as $sp) {
             $frame[$sp] = 1;
-            $expected['frame'][(string)$sp] = JsonFrameEncoder::COLOR_INDEX_FG;
+            $expected['frame'][(string)$sp] = JsonFrameEncoder::COLOR_FG;
         }
         $this->assertEquals(json_encode($expected), $this->encoder->encodeFrame($frame));
     }

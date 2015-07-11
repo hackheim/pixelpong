@@ -75,6 +75,10 @@ class PressStartToPlayGameLoop implements GameLoop
     /** @var int */
     private $previousTime;
 
+    private static $colorMap = [
+        '#' => Color::WHITE,
+        '-' => Color::LIGHT_GREY,
+    ];
 
     public function __construct(FrameBuffer $frameBuffer)
     {
@@ -124,8 +128,8 @@ class PressStartToPlayGameLoop implements GameLoop
         $fb = new OffscreenFrameBuffer($this->frameBuffer->getWidth(), $this->frameBuffer->getHeight());
         foreach ($lines as $y => $line) {
             for ($x = 0; $x < strlen($line); ++$x) {
-                if ($line[$x] === '#') {
-                    $fb->setPixel($x, $y, 1);
+                if (isset(self::$colorMap[$line[$x]])) {
+                    $fb->setPixel($x, $y, self::$colorMap[$line[$x]]);
                 }
             }
         }

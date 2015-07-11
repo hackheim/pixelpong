@@ -9,13 +9,13 @@ class OffscreenFrameBufferTest extends \PHPUnit_Framework_TestCase
     const WIDTH = 7;
     const HEIGHT = 3;
 
-    /** @var OffscreenFrameEncoder */
+    /** @var OffscreenFrameBuffer */
     private $ofb;
 
     protected function setUp()
     {
         parent::setUp();
-        $this->ofb = new OffscreenFrameEncoder(self::WIDTH, self::HEIGHT);
+        $this->ofb = new OffscreenFrameBuffer(self::WIDTH, self::HEIGHT);
     }
 
     public function testConstructor()

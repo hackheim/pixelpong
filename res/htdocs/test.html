@@ -13,12 +13,14 @@
   var canvas;
   var ctx;
   var frameCounter = 0;
+  var palette;
+  var currentColor;
 
   function init() {
     output = document.getElementById("output");
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#000000";
+    switchToColor('#000000');
     ctx.fillRect(0, 0, 500, 300);
     ctx.fillRect(0, 0, 20, 20);
     ctx.fillRect(0, 0, 20, 20);
@@ -49,20 +51,21 @@
     if (message.frameInfo) {
       width = message.frameInfo.width;
       height = message.frameInfo.height;
-      writeToScreen('<span style="color: blue;">Frame Info: ' + message.frameInfo.width + 'x' + message.frameInfo.height + '</span>');
+      palette = message.frameInfo.palette;
+      writeToScreen('<span style="color: blue;">Frame Info: ' + evt.data + '</span>');
     }
     if (message.frame) {
-      ctx.fillStyle = '#000000';
+      switchToColor('#000000');
       ctx.fillRect(0, 0, 500, 300);
-      ctx.fillStyle = '#ffffff';
       var pixelsDrawn = 0;
       for (var ix in message.frame) {
         var x = ix % width;
         var y = Math.floor(ix / width);
+        switchToColorIndex(message.frame[ix]);
         ctx.fillRect(x * 10, y * 10, 10, 10);
         ++pixelsDrawn;
       }
-      replaceOutput(pixelsDrawn + ' pixels drawn');
+//      replaceOutput(pixelsDrawn + ' pixels drawn');
     }
     //writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data+'</span>');
     //websocket.close();
@@ -75,6 +78,16 @@
   function doSend(message) {
     writeToScreen("SENT: " + message);
     websocket.send(message);
+  }
+
+  function switchToColor(color) {
+    if (color != currentColor) {
+      ctx.fillStyle = currentColor = color;
+    }
+  }
+
+  function switchToColorIndex(color) {
+    switchToColor(palette[color]);
   }
 
   function replaceOutput(message) {

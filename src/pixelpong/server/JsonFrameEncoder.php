@@ -6,8 +6,8 @@ namespace stigsb\pixelpong\server;
 
 class JsonFrameEncoder implements FrameEncoder
 {
-    const COLOR_INDEX_BG = 0;
-    const COLOR_INDEX_FG = 255;
+    const COLOR_BG = Color::BLACK;
+    const COLOR_FG = Color::WHITE;
 
     /** @var int */
     private $width;
@@ -20,7 +20,7 @@ class JsonFrameEncoder implements FrameEncoder
         $this->width = $frameBuffer->getWidth();
         $this->height = $frameBuffer->getHeight();
         $size = $this->width * $this->height;
-        $this->blankEncodedFrame = \SplFixedArray::fromArray(array_fill(0, $size, self::COLOR_INDEX_BG));
+        $this->blankEncodedFrame = \SplFixedArray::fromArray(array_fill(0, $size, self::COLOR_BG));
     }
 
     /**
@@ -32,7 +32,7 @@ class JsonFrameEncoder implements FrameEncoder
         $pixels = [];
         foreach ($frame as $ix => $color) {
             if ($color !== self::PIXEL_BG) {
-                $pixels[(string)$ix] = self::COLOR_INDEX_FG;
+                $pixels[(string)$ix] = $color;
             }
         }
         return json_encode([
@@ -50,6 +50,7 @@ class JsonFrameEncoder implements FrameEncoder
             'frameInfo' => [
                 'width' => $frameBuffer->getWidth(),
                 'height' => $frameBuffer->getHeight(),
+                'palette' => Color::getPalette(),
             ]
         ]);
     }
