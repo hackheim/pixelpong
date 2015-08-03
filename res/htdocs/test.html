@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title></title>
+  <title>pixelpong</title>
 </head>
 <body>
 <script language="javascript" type="text/javascript">
@@ -15,6 +15,7 @@
   var frameCounter = 0;
   var palette;
   var currentColor;
+  var retryInterval;
 
   function init() {
     output = document.getElementById("output");
@@ -39,11 +40,11 @@
 
   function onOpen(evt) {
     writeToScreen("CONNECTED: " + evt);
-    doSend('HELLO!');
+    doSend('{"hello":"HELLO!"}');
   }
 
   function onClose(evt) {
-    writeToScreen("DISCONNECTED: " + evt);
+    writeToScreen("DISCONNECTED");
   }
 
   function onMessage(evt) {

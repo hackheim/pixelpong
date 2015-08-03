@@ -23,20 +23,20 @@ $loop->addPeriodicTimer(0.5, function(\React\EventLoop\Timer\TimerInterface $tim
     $ix = time() % 4;
     switch ($ix) {
         case 0:
-            $game_server->onEvent(new Event(Event::JOY1_DOWN));
-            $game_server->onEvent(new Event(Event::JOY2_NEUTRAL));
+            $game_server->onEvent(new Event(Event::DEVICE_JOY_1, Event::JOY_AXIS_Y, Event::AXIS_DOWN));
+            $game_server->onEvent(new Event(Event::DEVICE_JOY_2, Event::JOY_AXIS_Y, Event::AXIS_NEUTRAL));
             break;
         case 1:
-            $game_server->onEvent(new Event(Event::JOY1_NEUTRAL));
-            $game_server->onEvent(new Event(Event::JOY2_DOWN));
+            $game_server->onEvent(new Event(Event::DEVICE_JOY_1, Event::JOY_AXIS_Y, Event::AXIS_NEUTRAL));
+            $game_server->onEvent(new Event(Event::DEVICE_JOY_2, Event::JOY_AXIS_Y, Event::AXIS_DOWN));
             break;
         case 2:
-            $game_server->onEvent(new Event(Event::JOY1_UP));
-            $game_server->onEvent(new Event(Event::JOY2_NEUTRAL));
+            $game_server->onEvent(new Event(Event::DEVICE_JOY_1, Event::JOY_AXIS_Y, Event::AXIS_UP));
+            $game_server->onEvent(new Event(Event::DEVICE_JOY_2, Event::JOY_AXIS_Y, Event::AXIS_NEUTRAL));
             break;
         case 3:
-            $game_server->onEvent(new Event(Event::JOY1_NEUTRAL));
-            $game_server->onEvent(new Event(Event::JOY2_UP));
+            $game_server->onEvent(new Event(Event::DEVICE_JOY_1, Event::JOY_AXIS_Y, Event::AXIS_NEUTRAL));
+            $game_server->onEvent(new Event(Event::DEVICE_JOY_2, Event::JOY_AXIS_Y, Event::AXIS_UP));
             break;
     }
 });
