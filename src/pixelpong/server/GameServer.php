@@ -26,7 +26,9 @@ class GameServer implements MessageComponentInterface
         $this->loop = $loop;
         $this->frameBuffer = $frameBuffer;
         $this->update_timer = $this->loop->addPeriodicTimer(0.2, [$this, 'onFrameUpdate']);
-        $this->gameLoop = new PressStartToPlayGameLoop($frameBuffer);
+//        $this->gameLoop = new PressStartToPlayGameLoop($frameBuffer);
+//        $this->gameLoop = new TrondheimMakerFaireScreen($frameBuffer);
+        $this->gameLoop = new JoystickTestGameLoop($frameBuffer);
 //        $this->gameLoop = new PlayingGameLoop($frameBuffer);
         $this->connections = new \SplObjectStorage();
     }

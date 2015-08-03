@@ -37,4 +37,11 @@ interface FrameBuffer
      * @return mixed
      */
     public function setBackgroundFrame(\SplFixedArray $frame);
+
+    /**
+     * @param Sprite $sprite
+     * @param int $x
+     * @param int $y
+     */
+    public function addSpriteAt(Sprite $sprite, $x, $y);
 }

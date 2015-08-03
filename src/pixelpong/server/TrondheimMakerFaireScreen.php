@@ -18,23 +18,15 @@ class TrondheimMakerFaireScreen implements GameLoop
     /** @var int */
     private $currentFrameIndex;
 
-    private static $colorMap = [
-        '#' => Color::WHITE,
-        '-' => Color::LIGHT_GREY,
-    ];
-
     public function __construct(FrameBuffer $frameBuffer)
     {
         $this->frameBuffer = $frameBuffer;
         $spriteLoader = new SpriteLoader(dirname(dirname(dirname(__DIR__))) . '/res/sprites');
         $this->frames = [];
         foreach (['trondheim', 'maker', 'faire'] as $spriteName) {
-            $sprite = $spriteLoader->loadSprite('trondheim');
+            $sprite = $spriteLoader->loadSprite($spriteName);
             $this->frames[] = $sprite->getPixels();
         }
-        $sprite = $spriteLoader->loadSprite('to_play');
-        $this->toPlayFrame = $sprite->getPixels();
-        $this->currentFrameIndex = -1;
     }
 
     /**
@@ -43,7 +35,8 @@ class TrondheimMakerFaireScreen implements GameLoop
      */
     public function onEnter()
     {
-        $this->frameBuffer->setBackgroundFrame($this->pressStartFrame);
+        $this->currentFrameIndex = 0;
+        $this->frameBuffer->setBackgroundFrame($this->frames[0]);
         $this->previousTime = time();
     }
 

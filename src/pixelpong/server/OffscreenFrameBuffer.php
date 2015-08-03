@@ -20,6 +20,10 @@ class OffscreenFrameBuffer implements FrameBuffer
 
     /** @var int */
     protected $frameBufferSize;
+
+    /** @var array[] */
+    protected $sprites;
+
     /**
      * @param int $width
      * @param int $height
@@ -29,6 +33,7 @@ class OffscreenFrameBuffer implements FrameBuffer
         $this->width = $width;
         $this->height = $height;
         $this->frameBufferSize = $width * $height;
+        $this->sprites = [];
         $this->setBackgroundFrame(\SplFixedArray::fromArray(array_fill(0, $this->frameBufferSize, 0)));
         $this->newFrame();
     }
@@ -82,6 +87,7 @@ class OffscreenFrameBuffer implements FrameBuffer
      */
     public function getAndSwitchFrame()
     {
+        $this->renderSprites();
         $frame = $this->currentFrame;
         $this->newFrame();
         return $frame;
@@ -93,6 +99,7 @@ class OffscreenFrameBuffer implements FrameBuffer
     protected function newFrame()
     {
         $this->currentFrame = clone $this->blankFrame;
+        $this->sprites = [];
     }
 
     /**
@@ -113,6 +120,33 @@ class OffscreenFrameBuffer implements FrameBuffer
     public function setBackgroundFrame(\SplFixedArray $frame)
     {
         $this->blankFrame = $frame;
+    }
+
+    /**
+     * @param Sprite $sprite
+     * @param int $x
+     * @param int $y
+     */
+    public function addSpriteAt(Sprite $sprite, $x, $y)
+    {
+        $this->sprites[] = [$sprite, $x, $y];
+    }
+
+    private function renderSprites()
+    {
+        foreach ($this->sprites as $sprite_meta) {
+            /** @var Sprite $sprite */
+            list($sprite, $xoff, $yoff) = $sprite_meta;
+            $pixels = $sprite->getPixels();
+            $w = $sprite->getWidth();
+            $h = $sprite->getHeight();
+            for ($x = 0; $x < $w; ++$x) {
+                for ($y = 0; $y < $h; ++$y) {
+                    $pixel = $pixels[($y * $w) + $x];
+                    $this->setPixel($x + $xoff, $y + $yoff, $pixel);
+                }
+            }
+        }
     }
 
 }
