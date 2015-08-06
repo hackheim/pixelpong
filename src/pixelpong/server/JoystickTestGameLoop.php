@@ -4,20 +4,32 @@
 namespace stigsb\pixelpong\server;
 
 
-class JoystickTestGameLoop implements GameLoop
+class JoystickTestGameLoop extends BaseGameLoop
 {
 
-    private $sprites = [];
+    /** @var Sprite */
+    private $p1UpSprite;
+
+    /** @var Sprite */
+    private $p1DownSprite;
+
+    /** @var Sprite */
+    private $p2UpSprite;
+
+    /** @var Sprite */
+    private $p2DownSprite;
 
     public function __construct(FrameBuffer $frameBuffer)
     {
-        $this->frameBuffer = $frameBuffer;
-        $spriteLoader = new SpriteLoader(dirname(dirname(dirname(__DIR__))) . '/res/sprites');
-        $this->upSprite     = $spriteLoader->loadSprite('joy_up');
-        $this->downSprite   = $spriteLoader->loadSprite('joy_down');
-        $this->leftSprite   = $spriteLoader->loadSprite('joy_left');
-        $this->rightSprite  = $spriteLoader->loadSprite('joy_right');
-        $this->buttonSprite = $spriteLoader->loadSprite('joy_button');
+        parent::__construct($frameBuffer);
+        $this->p1UpSprite     = $this->bitmapLoader->loadSprite('joy_up',    6,  6);
+        $this->p1DownSprite   = $this->bitmapLoader->loadSprite('joy_down',  6, 17);
+        $this->p2UpSprite     = $this->bitmapLoader->loadSprite('joy_up',   35,  6);
+        $this->p2DownSprite   = $this->bitmapLoader->loadSprite('joy_down', 35, 17);
+        $this->addSprite($this->p1UpSprite);
+        $this->addSprite($this->p1DownSprite);
+        $this->addSprite($this->p2UpSprite);
+        $this->addSprite($this->p2DownSprite);
     }
 
     /**
@@ -26,32 +38,11 @@ class JoystickTestGameLoop implements GameLoop
      */
     public function onEnter()
     {
-        $this->sprites = array_fill(0, 10, null);
-    }
-
-    public function onFrameUpdate()
-    {
-        foreach ($this->sprites as $i => $sprite) {
-            if ($sprite) {
-                switch ($i) {
-                    case 0:
-                        $this->frameBuffer->addSpriteAt($sprite, 12, 11);
-                        break;
-                    case 1:
-                        $this->frameBuffer->addSpriteAt($sprite, 6, 5);
-                        break;
-                    case 2:
-                        $this->frameBuffer->addSpriteAt($sprite, 12, 11);
-                        break;
-                    case 3:
-                        $this->frameBuffer->addSpriteAt($sprite, 6, 17);
-                        break;
-                    case 4:
-                        $this->frameBuffer->addSpriteAt($sprite, 0, 11);
-                        break;
-                }
-            }
-        }
+        parent::onEnter();
+        $this->p1UpSprite->setVisible(false);
+        $this->p1UpSprite->setVisible(false);
+        $this->p1UpSprite->setVisible(false);
+        $this->p1UpSprite->setVisible(false);
     }
 
     /**
@@ -60,33 +51,31 @@ class JoystickTestGameLoop implements GameLoop
      */
     public function onEvent(Event $event)
     {
-        if ($event->device == Event::DEVICE_JOY_1) {
-            if ($event->eventType == Event::JOY_AXIS_Y) {
-                switch ($event->value) {
-                    case Event::AXIS_UP:
-                        $this->sprites[1] = $this->upSprite;
-                        break;
-                    case Event::AXIS_DOWN:
-                        $this->sprites[3] = $this->downSprite;
-                        break;
-                    default:
-                        $this->sprites[1] = null;
-                        $this->sprites[3] = null;
-                        break;
-                }
-            } elseif ($event->eventType == Event::JOY_AXIS_X) {
-                switch ($event->value) {
-                    case Event::AXIS_RIGHT:
-                        $this->sprites[2] = $this->rightSprite;
-                        break;
-                    case Event::AXIS_LEFT:
-                        $this->sprites[4] = $this->leftSprite;
-                        break;
-                    default:
-                        $this->sprites[2] = null;
-                        $this->sprites[4] = null;
-                        break;
-                }
+        if ($event->device == Event::DEVICE_JOY_1 && $event->eventType == Event::JOY_AXIS_Y) {
+            switch ($event->value) {
+                case Event::AXIS_UP:
+                    $this->p1UpSprite->setVisible(true);
+                    break;
+                case Event::AXIS_DOWN:
+                    $this->p1DownSprite->setVisible(true);
+                    break;
+                default:
+                    $this->p1UpSprite->setVisible(false);
+                    $this->p1DownSprite->setVisible(false);
+                    break;
+            }
+        } elseif ($event->device == Event::DEVICE_JOY_2 && $event->eventType == Event::JOY_AXIS_Y) {
+            switch ($event->value) {
+                case Event::AXIS_UP:
+                    $this->p2UpSprite->setVisible(true);
+                    break;
+                case Event::AXIS_DOWN:
+                    $this->p2DownSprite->setVisible(true);
+                    break;
+                default:
+                    $this->p2UpSprite->setVisible(false);
+                    $this->p2DownSprite->setVisible(false);
+                    break;
             }
         }
     }

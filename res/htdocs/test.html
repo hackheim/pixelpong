@@ -16,6 +16,23 @@
   var palette;
   var currentColor;
   var retryInterval;
+  var keyDownEventMap = {
+    '65' /* a */: {'device': 1, 'eventType': 2, 'value': -1},
+    '90' /* z */: {'device': 1, 'eventType': 2, 'value':  1},
+    '75' /* k */: {'device': 2, 'eventType': 2, 'value': -1},
+    '77' /* m */: {'device': 2, 'eventType': 2, 'value':  1}
+  };
+  var keyUpEventMap = {
+    '65' /* a */: {'device': 1, 'eventType': 2, 'value': 0},
+    '90' /* z */: {'device': 1, 'eventType': 2, 'value': 0},
+    '75' /* k */: {'device': 2, 'eventType': 2, 'value': 0},
+    '77' /* m */: {'device': 2, 'eventType': 2, 'value': 0}
+  };
+  // device-axis
+  var activeAxes = {
+    '1-2': false,
+    '2-2': false
+  };
 
   function init() {
     output = document.getElementById("output");
@@ -27,6 +44,26 @@
     ctx.fillRect(0, 0, 20, 20);
     var pcanvas = document.getElementById('palette');
     pctx = pcanvas.getContext('2d');
+    window.addEventListener('keydown', function(ev) {
+      var code = '' + ev.keyCode;
+      if (keyDownEventMap[code]) {
+        var eventData = keyDownEventMap[code];
+        var devaxis = eventData.device + '-' + eventData.eventType;
+        if (!activeAxes[devaxis]) {
+          doSend(JSON.stringify({'event': eventData}));
+          activeAxes[devaxis] = true;
+        }
+      }
+    });
+    window.addEventListener('keyup', function(ev) {
+      var code = '' + ev.keyCode;
+      if (keyUpEventMap[code]) {
+        var eventData = keyUpEventMap[code];
+        var devaxis = eventData.device + '-' + eventData.eventType;
+        doSend(JSON.stringify({'event': eventData}));
+        activeAxes[devaxis] = false;
+      }
+    });
     testWebSocket();
   }
 
@@ -40,7 +77,7 @@
 
   function onOpen(evt) {
     writeToScreen("CONNECTED: " + evt);
-    doSend('{"hello":"HELLO!"}');
+    doSend('{"input":true,"output":true}');
   }
 
   function onClose(evt) {
@@ -83,7 +120,7 @@
   }
 
   function doSend(message) {
-    writeToScreen("SENT: " + message);
+    replaceOutput("SENT: " + message);
     websocket.send(message);
   }
 

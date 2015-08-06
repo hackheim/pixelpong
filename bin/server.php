@@ -19,27 +19,27 @@ $w = 47;
 $h = 27;
 $frame_buffer = new \stigsb\pixelpong\server\OffscreenFrameBuffer($w, $h);
 $game_server = new \stigsb\pixelpong\server\GameServer($loop, $frame_buffer);
-$loop->addPeriodicTimer(0.5, function(\React\EventLoop\Timer\TimerInterface $timer) use ($game_server) {
-    $ix = time() % 4;
-    switch ($ix) {
-        case 0:
-            $game_server->onEvent(new Event(Event::DEVICE_JOY_1, Event::JOY_AXIS_Y, Event::AXIS_DOWN));
-            $game_server->onEvent(new Event(Event::DEVICE_JOY_2, Event::JOY_AXIS_Y, Event::AXIS_NEUTRAL));
-            break;
-        case 1:
-            $game_server->onEvent(new Event(Event::DEVICE_JOY_1, Event::JOY_AXIS_Y, Event::AXIS_NEUTRAL));
-            $game_server->onEvent(new Event(Event::DEVICE_JOY_2, Event::JOY_AXIS_Y, Event::AXIS_DOWN));
-            break;
-        case 2:
-            $game_server->onEvent(new Event(Event::DEVICE_JOY_1, Event::JOY_AXIS_Y, Event::AXIS_UP));
-            $game_server->onEvent(new Event(Event::DEVICE_JOY_2, Event::JOY_AXIS_Y, Event::AXIS_NEUTRAL));
-            break;
-        case 3:
-            $game_server->onEvent(new Event(Event::DEVICE_JOY_1, Event::JOY_AXIS_Y, Event::AXIS_NEUTRAL));
-            $game_server->onEvent(new Event(Event::DEVICE_JOY_2, Event::JOY_AXIS_Y, Event::AXIS_UP));
-            break;
-    }
-});
+//$loop->addPeriodicTimer(0.5, function(\React\EventLoop\Timer\TimerInterface $timer) use ($game_server) {
+//    $ix = time() % 4;
+//    switch ($ix) {
+//        case 0:
+//            $game_server->onEvent(new Event(Event::DEVICE_JOY_1, Event::JOY_AXIS_Y, Event::AXIS_DOWN));
+//            $game_server->onEvent(new Event(Event::DEVICE_JOY_2, Event::JOY_AXIS_Y, Event::AXIS_NEUTRAL));
+//            break;
+//        case 1:
+//            $game_server->onEvent(new Event(Event::DEVICE_JOY_1, Event::JOY_AXIS_Y, Event::AXIS_NEUTRAL));
+//            $game_server->onEvent(new Event(Event::DEVICE_JOY_2, Event::JOY_AXIS_Y, Event::AXIS_DOWN));
+//            break;
+//        case 2:
+//            $game_server->onEvent(new Event(Event::DEVICE_JOY_1, Event::JOY_AXIS_Y, Event::AXIS_UP));
+//            $game_server->onEvent(new Event(Event::DEVICE_JOY_2, Event::JOY_AXIS_Y, Event::AXIS_NEUTRAL));
+//            break;
+//        case 3:
+//            $game_server->onEvent(new Event(Event::DEVICE_JOY_1, Event::JOY_AXIS_Y, Event::AXIS_NEUTRAL));
+//            $game_server->onEvent(new Event(Event::DEVICE_JOY_2, Event::JOY_AXIS_Y, Event::AXIS_UP));
+//            break;
+//    }
+//});
 
 $io_server = new Ratchet\Server\IoServer(
     new Ratchet\Http\HttpServer(

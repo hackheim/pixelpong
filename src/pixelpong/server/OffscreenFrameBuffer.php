@@ -22,7 +22,7 @@ class OffscreenFrameBuffer implements FrameBuffer
     protected $frameBufferSize;
 
     /** @var array[] */
-    protected $sprites;
+    protected $bitmapsToRender;
 
     /**
      * @param int $width
@@ -33,7 +33,7 @@ class OffscreenFrameBuffer implements FrameBuffer
         $this->width = $width;
         $this->height = $height;
         $this->frameBufferSize = $width * $height;
-        $this->sprites = [];
+        $this->bitmapsToRender = [];
         $this->setBackgroundFrame(\SplFixedArray::fromArray(array_fill(0, $this->frameBufferSize, 0)));
         $this->newFrame();
     }
@@ -87,7 +87,7 @@ class OffscreenFrameBuffer implements FrameBuffer
      */
     public function getAndSwitchFrame()
     {
-        $this->renderSprites();
+        $this->renderBitmaps();
         $frame = $this->currentFrame;
         $this->newFrame();
         return $frame;
@@ -99,7 +99,7 @@ class OffscreenFrameBuffer implements FrameBuffer
     protected function newFrame()
     {
         $this->currentFrame = clone $this->blankFrame;
-        $this->sprites = [];
+        $this->bitmapsToRender = [];
     }
 
     /**
@@ -123,19 +123,20 @@ class OffscreenFrameBuffer implements FrameBuffer
     }
 
     /**
-     * @param Sprite $sprite
+     * @param Bitmap $bitmap
      * @param int $x
      * @param int $y
      */
-    public function addSpriteAt(Sprite $sprite, $x, $y)
+    public function drawBitmapAt(Bitmap $bitmap, $x, $y)
     {
-        $this->sprites[] = [$sprite, $x, $y];
+        $this->bitmapsToRender[] = [$bitmap, $x, $y];
     }
 
-    private function renderSprites()
+    // TODO: rename to renderSprites
+    private function renderBitmaps()
     {
-        foreach ($this->sprites as $sprite_meta) {
-            /** @var Sprite $sprite */
+        foreach ($this->bitmapsToRender as $sprite_meta) {
+            /** @var Bitmap $sprite */
             list($sprite, $xoff, $yoff) = $sprite_meta;
             $pixels = $sprite->getPixels();
             $w = $sprite->getWidth();

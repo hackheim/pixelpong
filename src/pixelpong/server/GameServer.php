@@ -25,12 +25,13 @@ class GameServer implements MessageComponentInterface
     {
         $this->loop = $loop;
         $this->frameBuffer = $frameBuffer;
-        $this->update_timer = $this->loop->addPeriodicTimer(0.2, [$this, 'onFrameUpdate']);
 //        $this->gameLoop = new PressStartToPlayGameLoop($frameBuffer);
 //        $this->gameLoop = new TrondheimMakerFaireScreen($frameBuffer);
-        $this->gameLoop = new JoystickTestGameLoop($frameBuffer);
+//        $this->gameLoop = new JoystickTestGameLoop($frameBuffer);
 //        $this->gameLoop = new PlayingGameLoop($frameBuffer);
         $this->connections = new \SplObjectStorage();
+        $this->switchToGameLoop(new MainGameLoop($frameBuffer));
+        $this->update_timer = $this->loop->addPeriodicTimer(0.2, [$this, 'onFrameUpdate']);
     }
 
     /**
@@ -79,12 +80,23 @@ class GameServer implements MessageComponentInterface
     /**
      * Triggered when a client sends data through the socket
      * @param  \Ratchet\ConnectionInterface $from The socket/connection that sent the message to your application
-     * @param  string $msg The message received
+     * @param  string $rawmsg The message received
      * @throws \Exception
      */
-    public function onMessage(ConnectionInterface $from, $msg)
+    public function onMessage(ConnectionInterface $from, $rawmsg)
     {
-        printf("incoming message: $msg\n");
+        $msg = json_decode($rawmsg);
+        if (isset($msg->input)) {
+            $this->connections[$from]->setInputEnabled((bool)$msg->input);
+        }
+        if (isset($msg->output)) {
+            $this->connections[$from]->setOutputEnabled((bool)$msg->output);
+        }
+        if (isset($msg->event)) {
+            $event = new Event($msg->event->device, $msg->event->eventType, $msg->event->value);
+            $this->onEvent($event);
+        }
+        printf("incoming message: $rawmsg\n");
     }
 
     function onFrameUpdate(TimerInterface $timer)
@@ -92,13 +104,16 @@ class GameServer implements MessageComponentInterface
         $utime = microtime(true);
         $time = (int)$utime;
         $ms = (int)(($utime - $time) * 1000);
-        printf("== frameupdate: %s.%03d\n", strftime('%H:%M:%S', $time), $ms);
+//        printf("== frameupdate: %s.%03d\n", strftime('%H:%M:%S', $time), $ms);
         $this->gameLoop->onFrameUpdate();
         $frame = $this->frameBuffer->getAndSwitchFrame();
         $encodedFrameCache = [];
         foreach ($this->connections as $conn) {
             /** @var PlayerConnection $playerConnection */
             $playerConnection = $this->connections[$conn];
+            if (!$playerConnection->isOutputEnabled()) {
+                continue;
+            }
             $encoder = $playerConnection->getFrameEncoder();
             $key = get_class($encoder);
             if (!isset($encodedFrameCache[$key])) {
