@@ -6,6 +6,12 @@ namespace stigsb\pixelpong\server;
 
 class MainGameLoop extends BaseGameLoop
 {
+    /** base speed in pixels per second */
+    const BALL_SPEED = 6.0;
+
+    /** pixels per second */
+    const PADDLE_SPEED = 5.0;
+
     /** @var int */
     private $displayWidth;
 
@@ -15,17 +21,35 @@ class MainGameLoop extends BaseGameLoop
     /** @var Sprite[] */
     private $paddles;
 
-    /** @var int[] */
+    /** @var Sprite */
+    private $ball;
+
+    /** @var double[] */
     private $paddlePositions;
 
+    /** @var double[] */
+    private $lastYAxisUpdateTime;
+
     /** @var int[] */
-    private $joystickY;
+    private $currentYAxis;
 
     /** @var int[] */
     private static $paddleX = [1, 45];
 
+    /** @var double[] */
+    private $ballDelta;
+
+    /** @var double[] */
+    private $ballPos;
+
     /** @var int */
     private $paddleMaxY;
+
+    /** @var array[int]int  map from device id to paddle id */
+    private static $inputDevices = [
+        Event::DEVICE_JOY_1 => 0,
+        Event::DEVICE_JOY_2 => 1,
+    ];
 
     public function __construct(FrameBuffer $frameBuffer)
     {
@@ -35,15 +59,21 @@ class MainGameLoop extends BaseGameLoop
         $this->displayWidth = $frameBuffer->getWidth();
         $this->paddles = [];
         $this->paddlePositions = [];
-        $this->joystickY = [];
+        $this->currentYAxis = [];
         foreach (self::$paddleX as $i => $x) {
-            $paddle = $this->bitmapLoader->loadSprite('paddle', $x, 0);
+            $paddle = $this->bitmapLoader->loadSprite('paddle');
             $this->addSprite($paddle);
-            $this->paddles[] = $paddle;
-            $this->paddlePositions[$i] = 0;
-            $this->joystickY[$i] = 0;
+            $this->paddles[$i] = $paddle;
+            $this->paddlePositions[$i] = 0.0;
+            $this->currentYAxis[$i] = 0;
+            $this->lastYAxisUpdateTime[$i] = 0.0;
         }
         $this->paddleMaxY = $this->displayHeight - $this->paddles[0]->getBitmap()->getHeight();
+        $this->ballDelta = [0.0, 0.0];
+        $this->ballPos = [self::$paddleX[0] + 1.0, 12.0];
+        $this->ball = $this->bitmapLoader->loadSprite('ball');
+        $this->addSprite($this->ball);
+        $this->updateBallPosition();
     }
 
     /**
@@ -53,30 +83,33 @@ class MainGameLoop extends BaseGameLoop
     public function onEnter()
     {
         parent::onEnter();
-        $paddleY = (int)(($this->displayHeight / 2) - ($this->paddles[0]->getBitmap()->getHeight() / 2));
-        $this->paddlePositions = [$paddleY, $paddleY];
-        $this->joystickY = [Event::AXIS_NEUTRAL, Event::AXIS_NEUTRAL];
-        self::updatePaddlePositions();
+        foreach ($this->paddlePositions as $i => &$pos) {
+            $pos = ($this->displayHeight / 2.0) - ($this->paddles[$i]->getBitmap()->getHeight() / 2.0);
+        }
+        $this->currentYAxis = [Event::AXIS_NEUTRAL, Event::AXIS_NEUTRAL];
+        self::updatePaddleSpritePositions();
     }
 
-    private function updatePaddlePositions()
+    private function updateBallPosition() {
+        $this->ballPos[0] += $this->ballDelta[0];
+        $this->ballPos[1] += $this->ballDelta[1];
+        $this->ball->moveTo((int)$this->ballPos[0], (int)$this->ballPos[1]);
+    }
+
+    private function updatePaddleSpritePositions()
     {
-        foreach ($this->paddlePositions as $i => $ypos) {
-            $this->paddles[$i]->moveTo(self::$paddleX[$i], $ypos);
+        foreach ($this->paddlePositions as $paddle => $ypos) {
+            $this->paddles[$paddle]->moveTo(self::$paddleX[$paddle], (int)$ypos);
         }
     }
 
     public function onFrameUpdate()
     {
         // Move sprites before calling parent
-        foreach ($this->joystickY as $i => $value) {
-            if ($value == Event::AXIS_UP && $this->paddlePositions[$i] > 0) {
-                --$this->paddlePositions[$i];
-            } elseif ($value == Event::AXIS_DOWN && $this->paddlePositions[$i] < $this->paddleMaxY) {
-                ++$this->paddlePositions[$i];
-            }
+        foreach (self::$inputDevices as $device => $paddle) {
+            $this->updatePaddlePositionForDevice($device);
         }
-        $this->updatePaddlePositions();
+        $this->updatePaddleSpritePositions();
         parent::onFrameUpdate();
     }
 
@@ -87,11 +120,30 @@ class MainGameLoop extends BaseGameLoop
      */
     public function onEvent(Event $event)
     {
-        if ($event->device == Event::DEVICE_JOY_1 && $event->eventType == Event::JOY_AXIS_Y) {
-            $this->joystickY[0] = $event->value;
-        } elseif ($event->device == Event::DEVICE_JOY_2 && $event->eventType == Event::JOY_AXIS_Y) {
-            $this->joystickY[1] = $event->value;
+        if ($event->eventType == Event::JOY_AXIS_Y) {
+            var_dump($event);
+            if ($event->value == Event::AXIS_NEUTRAL) {
+                $this->updatePaddlePositionForDevice($event->device);
+            }
+            $paddle = self::$inputDevices[$event->device];
+            $this->currentYAxis[$paddle] = $event->value;
         }
+    }
+
+    private function updatePaddlePositionForDevice($device)
+    {
+        $paddle = self::$inputDevices[$device];
+        $now_us = microtime(true);
+        $elapsed = $now_us - $this->lastYAxisUpdateTime[$paddle];
+        $new_pos = $this->paddlePositions[$paddle] + ((double)self::PADDLE_SPEED * $elapsed * $this->currentYAxis[$paddle]);
+        if ($new_pos < 0) {
+            $new_pos = 0;
+        } elseif ($new_pos > $this->paddleMaxY) {
+            $new_pos = $this->paddleMaxY;
+        }
+        $this->paddlePositions[$paddle] = $new_pos;
+        $this->lastYAxisUpdateTime[$paddle] = $now_us;
+        printf("updating position for device %d to %.3f (elapsed %.6f, axis %d)\n", $device, $new_pos, $elapsed, $this->currentYAxis[$paddle]);
     }
 
 }
