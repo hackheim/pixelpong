@@ -121,7 +121,6 @@ class MainGameLoop extends BaseGameLoop
     public function onEvent(Event $event)
     {
         if ($event->eventType == Event::JOY_AXIS_Y) {
-            var_dump($event);
             if ($event->value == Event::AXIS_NEUTRAL) {
                 $this->updatePaddlePositionForDevice($event->device);
             }
@@ -143,7 +142,7 @@ class MainGameLoop extends BaseGameLoop
         }
         $this->paddlePositions[$paddle] = $new_pos;
         $this->lastYAxisUpdateTime[$paddle] = $now_us;
-        printf("updating position for device %d to %.3f (elapsed %.6f, axis %d)\n", $device, $new_pos, $elapsed, $this->currentYAxis[$paddle]);
+//        printf("updating position for device %d to %.3f (elapsed %.6f, axis %d)\n", $device, $new_pos, $elapsed, $this->currentYAxis[$paddle]);
     }
 
 }

@@ -17,12 +17,14 @@
   var currentColor;
   var retryInterval;
   var keyDownEventMap = {
+    '32' /* space */: {'device': 1, 'eventType': 3, 'value':  1},
     '65' /* a */: {'device': 1, 'eventType': 2, 'value': -1},
     '90' /* z */: {'device': 1, 'eventType': 2, 'value':  1},
     '75' /* k */: {'device': 2, 'eventType': 2, 'value': -1},
     '77' /* m */: {'device': 2, 'eventType': 2, 'value':  1}
   };
   var keyUpEventMap = {
+    '32' /* space */: {'device': 1, 'eventType': 3, 'value':  0},
     '65' /* a */: {'device': 1, 'eventType': 2, 'value': 0},
     '90' /* z */: {'device': 1, 'eventType': 2, 'value': 0},
     '75' /* k */: {'device': 2, 'eventType': 2, 'value': 0},
