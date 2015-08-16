@@ -31,7 +31,7 @@ class GameServer implements MessageComponentInterface
 //        $this->gameLoop = new PlayingGameLoop($frameBuffer);
         $this->connections = new \SplObjectStorage();
         $this->switchToGameLoop(new MainGameLoop($frameBuffer));
-        $this->update_timer = $this->loop->addPeriodicTimer(0.1, [$this, 'onFrameUpdate']);
+        $this->update_timer = $this->loop->addPeriodicTimer(1.0/7.0, [$this, 'onFrameUpdate']);
     }
 
     /**

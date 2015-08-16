@@ -7,7 +7,10 @@ namespace stigsb\pixelpong\server;
 class MainGameLoop extends BaseGameLoop
 {
     /** base speed in pixels per second */
-    const BALL_SPEED = 6.0;
+    const BALL_SPEED = 3.0;
+
+    /** pixels per second */
+    const PADDLE_SPEED = 10.0;
 
     /** index in various arrays for the left paddle */
     const LEFT = 0;
@@ -24,19 +27,23 @@ class MainGameLoop extends BaseGameLoop
     /** index in various arrays for the ball Y coordinate */
     const Y = 1;
 
-    /** pixels per second */
-    const PADDLE_SPEED = 10.0;
+    /** still initializing the game (measuring frame rate) */
+    const GAMESTATE_INITIALIZING = 1;
 
     /** waiting for one of the players to start the game */
-    const GAMESTATE_WAITING = 1;
+    const GAMESTATE_WAITING = 2;
 
     /** game in progress */
-    const GAMESTATE_PLAYING = 2;
+    const GAMESTATE_PLAYING = 3;
 
     /** the game (round) is over, and we have a winner! */
-    const GAMESTATE_GAMEOVER = 3;
+    const GAMESTATE_GAMEOVER = 4;
 
     const PADDLE_CENTER_Y = 12.0;
+
+    const PADDLE_DISTANCE_TO_SIDES = 1.0;
+
+    const BALL_SPEEDUP_EVERY_N_SECS = 10;
 
     /** @var int */
     private $displayWidth;
@@ -60,9 +67,9 @@ class MainGameLoop extends BaseGameLoop
     private $currentYAxis;
 
     /** @var int[] */
-    private static $paddleX = [
-        self::LEFT => 1,
-        self::RIGHT => 45,
+    private static $paddlePosX = [
+        self::LEFT => 1.0,
+        self::RIGHT => 45.0,
     ];
 
     /** @var double[] */
@@ -99,48 +106,81 @@ class MainGameLoop extends BaseGameLoop
 
     private $paddleWidth;
 
+    private $initializationTimestamp;
+
+    private $startTimestamp;
+
+    private $approxFrameTime;
+
+    private $frameTimestamp;
+
+    private $lastSpeedupTimestamp;
+
     public function __construct(FrameBuffer $frameBuffer)
     {
         parent::__construct($frameBuffer);
+        $this->initializeGame($frameBuffer);
+    }
+
+    protected function initializeGame(FrameBuffer $frameBuffer)
+    {
         $this->background = $this->bitmapLoader->loadBitmap('main_game');
         $this->displayHeight = $frameBuffer->getHeight();
         $this->displayWidth = $frameBuffer->getWidth();
-        $this->paddles = [];
-        $this->paddlePositions = [];
-        $this->currentYAxis = [];
-        foreach (self::$paddleX as $i => $x) {
-            $paddle = $this->bitmapLoader->loadSprite('paddle');
-            $this->addSprite($paddle);
-            $this->paddles[$i] = $paddle;
-            $this->paddlePositions[$i] = 0.0;
-            $this->currentYAxis[$i] = 0;
-            $this->lastYAxisUpdateTime[$i] = 0.0;
-        }
+        $this->paddles = [
+            self::LEFT  => $this->bitmapLoader->loadSprite('paddle'),
+            self::RIGHT => $this->bitmapLoader->loadSprite('paddle'),
+        ];
+        $this->addSprite($this->paddles[self::LEFT]);
+        $this->addSprite($this->paddles[self::RIGHT]);
         $this->paddleHeight = $this->paddles[self::LEFT]->getBitmap()->getHeight();
         $this->paddleWidth = $this->paddles[self::LEFT]->getBitmap()->getWidth();
         $this->paddleMaxY = $this->displayHeight - $this->paddleHeight;
-        $this->winningSide = null;
         $this->ball = $this->bitmapLoader->loadSprite('ball');
+        $this->addSprite($this->ball);
         $this->ballHeight = $this->ball->getBitmap()->getHeight();
         $this->ballWidth = $this->ball->getBitmap()->getWidth();
-        $this->ballDelta = [
-            self::X => 0.0,
-            self::Y => 0.0,
-        ];
         $this->ballPaddleLimitX = [
-            self::LEFT => (double)(self::$paddleX[self::LEFT] + $this->paddleWidth),
-            self::RIGHT => (double)(self::$paddleX[self::RIGHT] - $this->paddleWidth),
+            self::LEFT => (double)(self::$paddlePosX[self::LEFT] + $this->paddleWidth),
+            self::RIGHT => (double)(self::$paddlePosX[self::RIGHT] - $this->paddleWidth),
         ];
         $this->ballEdgeLimitY = [
             self::TOP => 0.0,
             self::BOTTOM => (double)($this->displayHeight - $this->ballHeight),
         ];
+        $this->frameTimestamp = microtime(true);
+        $this->gameState = self::GAMESTATE_INITIALIZING;
+    }
+
+    protected function resetGame()
+    {
+        $this->lastYAxisUpdateTime = [
+            self::LEFT  => 0.0,
+            self::RIGHT => 0.0,
+        ];
+        $this->currentYAxis = [
+            self::LEFT => Event::AXIS_NEUTRAL,
+            self::RIGHT => Event::AXIS_NEUTRAL,
+        ];
+        $this->winningSide = null;
+        $paddle_middle_y = ($this->displayHeight / 2.0) - ($this->paddleHeight / 2.0);
+        $this->paddlePositions = [
+            self::LEFT  => $paddle_middle_y,
+            self::RIGHT => $paddle_middle_y,
+        ];
         $this->ballPos = [
             self::X => $this->ballPaddleLimitX[self::LEFT],
             self::Y => self::PADDLE_CENTER_Y,
         ];
-        $this->addSprite($this->ball);
+        $this->ballDelta = [
+            self::X => 0.0,
+            self::Y => 0.0,
+        ];
+        $this->gameState = self::GAMESTATE_INITIALIZING;
+        $this->initializationTimestamp = null;
+        $this->startTimestamp = null;
         $this->updateBallSpritePosition();
+        $this->updatePaddleSpritePositions();
     }
 
     /**
@@ -150,75 +190,8 @@ class MainGameLoop extends BaseGameLoop
     public function onEnter()
     {
         parent::onEnter();
-        foreach ($this->paddlePositions as $i => &$pos) {
-            $pos = ($this->displayHeight / 2.0) - ($this->paddles[$i]->getBitmap()->getHeight() / 2.0);
-        }
-        $this->currentYAxis = [self::LEFT => Event::AXIS_NEUTRAL, self::RIGHT => Event::AXIS_NEUTRAL];
-        $this->gameState = self::GAMESTATE_WAITING;
-        $this->updatePaddleSpritePositions();
+        $this->resetGame();
     }
-
-    private function updateBallPosition() {
-        $this->ballPos[self::X] += $this->ballDelta[self::X];
-        $this->ballPos[self::Y] += $this->ballDelta[self::Y];
-        if ($this->hasBallHitTop()) {
-            $this->bounceBallOnTop();
-        } elseif ($this->hasBallHitBottom()) {
-            $this->bounceBallOnBottom();
-        }
-        if ($this->isBallPastLeftPaddle()) {
-            if ($this->hasBallHitPaddle(self::LEFT)) {
-                $this->bounceBallOnPaddle(self::LEFT);
-                print "bounce ball on left paddle\n";
-            } else {
-                $this->playerWon(self::RIGHT);
-                return;
-            }
-        } elseif ($this->isBallPastRightPaddle()) {
-            printf("past right paddle!\n");
-            if ($this->hasBallHitPaddle(self::RIGHT)) {
-                $this->bounceBallOnPaddle(self::RIGHT);
-                print "bounce ball on right paddle\n";
-            } else {
-                $this->playerWon(self::LEFT);
-                return;
-            }
-        }
-        printf("new ball position: [%d,%d]\n", $this->ballPos[self::X], $this->ballPos[self::Y]);
-        $this->updateBallSpritePosition();
-    }
-
-    private function updateBallSpritePosition()
-    {
-        $this->ball->moveTo((int)$this->ballPos[self::X], (int)$this->ballPos[self::Y]);
-    }
-
-    private function updatePaddleSpritePositions()
-    {
-        foreach ($this->paddlePositions as $paddle => $ypos) {
-            $this->paddles[$paddle]->moveTo(self::$paddleX[$paddle], (int)$ypos);
-        }
-    }
-
-    public function onFrameUpdate()
-    {
-        switch ($this->gameState) {
-            case self::GAMESTATE_PLAYING:
-                // Move sprites before calling parent
-                foreach (self::$inputDevices as $device => $paddle) {
-                    $this->updatePaddlePositionForDevice($device);
-                }
-                $this->updatePaddleSpritePositions();
-                $this->updateBallPosition();
-                break;
-            case self::GAMESTATE_WAITING:
-            case self::GAMESTATE_GAMEOVER:
-            default:
-                break;
-        }
-        parent::onFrameUpdate();
-    }
-
 
     /**
      * An input event occurs (joystick action).
@@ -242,16 +215,99 @@ class MainGameLoop extends BaseGameLoop
                 }
                 break;
             case self::GAMESTATE_GAMEOVER:
+                if ($event->eventType == Event::JOY_BUTTON_1 && $event->value == Event::BUTTON_NEUTRAL) {
+                    $this->resetGame();
+                }
                 break;
             default:
                 break;
         }
     }
 
-    private function updatePaddlePositionForDevice($device)
+    public function onFrameUpdate()
+    {
+        $this->frameTimestamp = microtime(true);
+        switch ($this->gameState) {
+            case self::GAMESTATE_INITIALIZING:
+                if (empty($this->initializationTimestamp)) {
+                    $this->initializationTimestamp = $this->getCurrentMicrotime();
+                } else {
+                    $this->approxFrameTime = $this->getCurrentMicrotime() - $this->initializationTimestamp;
+                    printf("approxFrameTime: %f\n", $this->approxFrameTime);
+                    $this->gameState = self::GAMESTATE_WAITING;
+                }
+                break;
+            case self::GAMESTATE_PLAYING:
+                // Move sprites before calling parent
+                foreach (self::$inputDevices as $device => $paddle) {
+                    $this->updatePaddlePositionForDevice($device);
+                }
+                $this->updatePaddleSpritePositions();
+                $this->updateBallPosition();
+                break;
+            case self::GAMESTATE_WAITING:
+            case self::GAMESTATE_GAMEOVER:
+            default:
+                break;
+        }
+        parent::onFrameUpdate();
+    }
+
+    protected function startGame()
+    {
+        $this->ballDelta = [
+            self::X => self::PADDLE_SPEED * $this->approxFrameTime,
+            self::Y => self::PADDLE_SPEED * $this->approxFrameTime,
+        ];
+        $this->gameState = self::GAMESTATE_PLAYING;
+        $this->lastSpeedupTimestamp = $this->startTimestamp = $this->getCurrentMicrotime();
+        printf("Starting game!\n");
+    }
+
+    protected function updateBallPosition() {
+        $this->ballPos[self::X] += $this->ballDelta[self::X];
+        $this->ballPos[self::Y] += $this->ballDelta[self::Y];
+        if ($this->ballHasHitTopEdge()) {
+            $this->bounceBallOnEdge(self::TOP);
+        } elseif ($this->ballHasHitBottomEdge()) {
+            $this->bounceBallOnEdge(self::BOTTOM);
+        }
+        if ($this->ballIsPastLeftPaddle()) {
+            if ($this->ballHitPaddle(self::LEFT)) {
+                $this->bounceBallOnPaddle(self::LEFT);
+                print "bounce ball on left paddle\n";
+            } else {
+                $this->playerWon(self::RIGHT);
+            }
+        } elseif ($this->ballIsPastRightPaddle()) {
+            printf("past right paddle!\n");
+            if ($this->ballHitPaddle(self::RIGHT)) {
+                $this->bounceBallOnPaddle(self::RIGHT);
+                print "bounce ball on right paddle\n";
+            } else {
+                $this->playerWon(self::LEFT);
+            }
+        }
+        printf("new ball position: [%d,%d]\n", $this->ballPos[self::X], $this->ballPos[self::Y]);
+        $this->updateBallSpritePosition();
+    }
+
+    protected function updateBallSpritePosition()
+    {
+        $this->ball->moveTo((int)$this->ballPos[self::X], (int)$this->ballPos[self::Y]);
+    }
+
+    protected function updatePaddleSpritePositions()
+    {
+        foreach ($this->paddlePositions as $paddle => $ypos) {
+            $this->paddles[$paddle]->moveTo(self::$paddlePosX[$paddle], (int)$ypos);
+        }
+    }
+
+    protected function updatePaddlePositionForDevice($device)
     {
         $paddle = self::$inputDevices[$device];
-        $now_us = microtime(true);
+        $now_us = $this->getCurrentMicrotime();
         $elapsed = $now_us - $this->lastYAxisUpdateTime[$paddle];
         $new_pos = $this->paddlePositions[$paddle] + ((double)self::PADDLE_SPEED * $elapsed * $this->currentYAxis[$paddle]);
         if ($new_pos < 0) {
@@ -264,14 +320,7 @@ class MainGameLoop extends BaseGameLoop
 //        printf("updating position for device %d to %.3f (elapsed %.6f, axis %d)\n", $device, $new_pos, $elapsed, $this->currentYAxis[$paddle]);
     }
 
-    private function startGame()
-    {
-        $this->ballDelta = [2.0, 2.0];
-        $this->gameState = self::GAMESTATE_PLAYING;
-        printf("Starting game!\n");
-    }
-
-    private function playerWon($side)
+    protected function playerWon($side)
     {
         printf("%s side won!\n", $side == self::LEFT ? 'Left' : 'Right');
         $this->gameState = self::GAMESTATE_GAMEOVER;
@@ -281,7 +330,7 @@ class MainGameLoop extends BaseGameLoop
     /**
      * @return bool
      */
-    private function hasBallHitTop()
+    protected function ballHasHitTopEdge()
     {
         return ($this->ballPos[self::Y] <= $this->ballEdgeLimitY[self::TOP]);
     }
@@ -289,7 +338,7 @@ class MainGameLoop extends BaseGameLoop
     /**
      * @return bool
      */
-    private function hasBallHitBottom()
+    protected function ballHasHitBottomEdge()
     {
         return ($this->ballPos[self::Y] >= $this->ballEdgeLimitY[self::BOTTOM]);
     }
@@ -297,7 +346,7 @@ class MainGameLoop extends BaseGameLoop
     /**
      * @return bool
      */
-    private function isBallPastLeftPaddle()
+    protected function ballIsPastLeftPaddle()
     {
         return ($this->ballPos[self::X] <= $this->ballPaddleLimitX[self::LEFT]);
     }
@@ -305,12 +354,16 @@ class MainGameLoop extends BaseGameLoop
     /**
      * @return bool
      */
-    private function isBallPastRightPaddle()
+    protected function ballIsPastRightPaddle()
     {
         return ($this->ballPos[self::X] >= $this->ballPaddleLimitX[self::RIGHT]);
     }
 
-    private function hasBallHitPaddle($paddle)
+    /**
+     * @param int $paddle
+     * @return bool
+     */
+    protected function ballHitPaddle($paddle)
     {
         $ball_y = $this->ballPos[self::Y];
         $paddle_y_min = $this->paddlePositions[$paddle] - $this->ballHeight;
@@ -318,24 +371,42 @@ class MainGameLoop extends BaseGameLoop
         return ($ball_y > $paddle_y_min && $ball_y < $paddle_y_max);
     }
 
-    private function bounceBallOnPaddle($paddle)
+    /**
+     * @param int $paddle  self::LEFT or self::RIGHT
+     */
+    protected function bounceBallOnPaddle($paddle)
     {
         $bounceBack = $this->ballPaddleLimitX[$paddle] - $this->ballPos[self::X];
         $this->ballPos[self::X] = $this->ballPaddleLimitX[$paddle] + $bounceBack;
         $this->ballDelta[self::X] *= -1.0;
+        $this->maybeSpeedUpBall();
     }
 
-    private function bounceBallOnTop()
+    /**
+     * @param int $edge  self::TOP or self::BOTTOM
+     */
+    protected function bounceBallOnEdge($edge)
     {
+        $bounceBack = $this->ballEdgeLimitY[$edge] - $this->ballPos[self::Y];
+        $this->ballPos[self::Y] = $this->ballEdgeLimitY[$edge] + $bounceBack;
         $this->ballDelta[self::Y] *= -1.0;
-        $this->ballPos[self::Y] += $this->ballDelta[self::Y];
     }
 
-    private function bounceBallOnBottom()
+    protected function getCurrentMicrotime()
     {
-        $this->ballDelta[self::Y] *= -1.0;
-        $this->ballPos[self::Y] += $this->ballDelta[self::Y];
-//        $this->ballPos[self::Y] = 25.0 - ($this->ballPos[self::Y] - 25.0);
+        return $this->frameTimestamp;
     }
 
+    protected function maybeSpeedUpBall()
+    {
+        $currentMicrotime = $this->getCurrentMicrotime();
+        $timeSinceLast = $currentMicrotime - $this->lastSpeedupTimestamp;
+        printf("timeSinceLast=%f\n", $timeSinceLast);
+        if ($timeSinceLast >= self::BALL_SPEEDUP_EVERY_N_SECS) {
+            $this->ballDelta[self::X] *= 1.05;
+            $this->ballDelta[self::Y] *= 1.05;
+            $this->lastSpeedupTimestamp = $currentMicrotime;
+            printf("Speeding up ball!\n");
+        }
+    }
 }
