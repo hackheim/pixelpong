@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>pixelpong</title>
 </head>
-<body>
+<body bgcolor="#000000">
 <script language="javascript" type="text/javascript">
   var wsUri = "ws://localhost:4432/";
   var output;
@@ -41,11 +41,12 @@
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
     switchToColor('#000000');
-    ctx.fillRect(0, 0, 500, 300);
-    ctx.fillRect(0, 0, 20, 20);
-    ctx.fillRect(0, 0, 20, 20);
+//    ctx.fillRect(0, 0, 2000, 162);
+    ctx.fillRect(0, 0, 800, 600);
     var pcanvas = document.getElementById('palette');
-    pctx = pcanvas.getContext('2d');
+    if (pcanvas) {
+      pctx = pcanvas.getContext('2d');
+    }
     window.addEventListener('keydown', function(ev) {
       var code = '' + ev.keyCode;
       if (keyDownEventMap[code]) {
@@ -94,25 +95,28 @@
       width = message.frameInfo.width;
       height = message.frameInfo.height;
       palette = message.frameInfo.palette;
-      for (var i = 0; i < palette.length; ++i) {
-        pctx.fillStyle = palette[i];
-        pctx.fillRect(0, i * 15, 40, 15);
+      if (pctx) {
+        for (var i = 0; i < palette.length; ++i) {
+          pctx.fillStyle = palette[i];
+          pctx.fillRect(0, i * 15, 40, 15);
+        }
       }
 //      writeToScreen('<span style="color: blue;">Frame Info: ' + evt.data + '</span>');
     }
     if (message.frame) {
       switchToColor('#000000');
-      ctx.fillRect(0, 0, 500, 300);
+      ctx.fillRect(0, 0, 800, 600);
       var pixelsDrawn = 0;
       for (var ix in message.frame) {
         var x = ix % width;
         var y = Math.floor(ix / width);
         switchToColorIndex(message.frame[ix]);
-        ctx.fillRect(x * 10, y * 10, 10, 10);
+        ctx.fillRect((x * 8), (y * 6), 8, 6);
         ++pixelsDrawn;
       }
 //      replaceOutput(pixelsDrawn + ' pixels drawn');
     }
+
     //writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data+'</span>');
     //websocket.close();
   }
@@ -150,8 +154,7 @@
   window.addEventListener("load", init, false);
 </script>
 
-<canvas width="470" height="270" id="canvas"></canvas>
-<canvas width="40" height="240" id="palette"></canvas>
+<canvas width="800" height="600" id="canvas"></canvas>
 <div style="font-family: monospace"><pre id="output"></pre></div>
 
 </body>
