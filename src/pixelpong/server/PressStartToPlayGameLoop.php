@@ -60,7 +60,11 @@ class PressStartToPlayGameLoop extends BaseGameLoop
      */
     public function onEvent(Event $event)
     {
-        // TODO: Implement onEvent() method.
+        if ($event->eventType == Event::JOY_BUTTON_1 && $event->value == Event::BUTTON_NEUTRAL) {
+            $this->container->get(GameServer::class)->switchToGameLoop(
+                $this->container->get(MainGameLoop::class)
+            );
+        }
     }
 
 }
