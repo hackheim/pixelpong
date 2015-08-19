@@ -2,6 +2,7 @@
 
 namespace stigsb\pixelpong\server;
 
+use Interop\Container\ContainerInterface;
 use Ratchet\ConnectionInterface;
 use Ratchet\MessageComponentInterface;
 use React\EventLoop\LoopInterface;
@@ -21,17 +22,22 @@ class GameServer implements MessageComponentInterface
     /** @var FrameBuffer */
     private $frameBuffer;
 
-    public function __construct(LoopInterface $loop, FrameBuffer $frameBuffer)
+    /** @var ContainerInterface */
+    private $container;
+
+    public function __construct(LoopInterface $loop, FrameBuffer $frameBuffer, ContainerInterface $container)
     {
         $this->loop = $loop;
         $this->frameBuffer = $frameBuffer;
-//        $this->gameLoop = new PressStartToPlayGameLoop($frameBuffer);
+        $this->container = $container;
+        $this->gameLoop = $container->get(PressStartToPlayGameLoop::class);
 //        $this->gameLoop = new TrondheimMakerFaireScreen($frameBuffer);
 //        $this->gameLoop = new JoystickTestGameLoop($frameBuffer);
 //        $this->gameLoop = new PlayingGameLoop($frameBuffer);
         $this->connections = new \SplObjectStorage();
-        $this->switchToGameLoop(new MainGameLoop($frameBuffer));
-        $this->update_timer = $this->loop->addPeriodicTimer(1.0/7.0, [$this, 'onFrameUpdate']);
+        $this->switchToGameLoop($container->get(MainGameLoop::class));
+        $fps = (double)$container->get('server.fps');
+        $this->update_timer = $this->loop->addPeriodicTimer(1.0/$fps, [$this, 'onFrameUpdate']);
     }
 
     /**
@@ -86,6 +92,10 @@ class GameServer implements MessageComponentInterface
     public function onMessage(ConnectionInterface $from, $rawmsg)
     {
         $msg = json_decode($rawmsg);
+        if (isset($msg->V) && isset($msg->D) && isset($msg->T)) {
+            $msg = (object)['event' => (object)['device' => $msg->D, 'eventType' => $msg->T, 'value' => $msg->V]];
+            $rawmsg .= json_encode($msg);
+        }
         if (isset($msg->input)) {
             $this->connections[$from]->setInputEnabled((bool)$msg->input);
         }

@@ -4,6 +4,8 @@
 namespace stigsb\pixelpong\server;
 
 
+use Interop\Container\ContainerInterface;
+
 class PressStartToPlayGameLoop extends BaseGameLoop
 {
     /** @var \SplFixedArray */
@@ -18,9 +20,9 @@ class PressStartToPlayGameLoop extends BaseGameLoop
     /** @var int */
     private $previousTime;
 
-    public function __construct(FrameBuffer $frameBuffer)
+    public function __construct(FrameBuffer $frameBuffer, ContainerInterface $container)
     {
-        parent::__construct($frameBuffer);
+        parent::__construct($frameBuffer, $container);
         $this->pressStartFrame = $this->bitmapLoader->loadBitmap('press_start')->getPixels();
         $this->toPlayFrame = $this->bitmapLoader->loadBitmap('to_play')->getPixels();
     }

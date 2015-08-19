@@ -4,6 +4,8 @@
 namespace stigsb\pixelpong\server;
 
 
+use Interop\Container\ContainerInterface;
+
 abstract class BaseGameLoop implements GameLoop
 {
     /** @var FrameBuffer */
@@ -18,9 +20,13 @@ abstract class BaseGameLoop implements GameLoop
     /** @var Sprite[] */
     protected $sprites;
 
-    public function __construct(FrameBuffer $frameBuffer)
+    /** @var ContainerInterface */
+    protected $container;
+
+    public function __construct(FrameBuffer $frameBuffer, ContainerInterface $container)
     {
         $this->frameBuffer = $frameBuffer;
+        $this->container = $container;
         $this->bitmapLoader = new BitmapLoader(dirname(dirname(dirname(__DIR__))) . '/res/sprites');
         $this->sprites = [];
     }

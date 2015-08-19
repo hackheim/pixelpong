@@ -4,6 +4,8 @@
 namespace stigsb\pixelpong\server;
 
 
+use Interop\Container\ContainerInterface;
+
 class JoystickTestGameLoop extends BaseGameLoop
 {
 
@@ -19,9 +21,9 @@ class JoystickTestGameLoop extends BaseGameLoop
     /** @var Sprite */
     private $p2DownSprite;
 
-    public function __construct(FrameBuffer $frameBuffer)
+    public function __construct(FrameBuffer $frameBuffer, ContainerInterface $container)
     {
-        parent::__construct($frameBuffer);
+        parent::__construct($frameBuffer, $container);
         $this->p1UpSprite     = $this->bitmapLoader->loadSprite('joy_up',    6,  6);
         $this->p1DownSprite   = $this->bitmapLoader->loadSprite('joy_down',  6, 17);
         $this->p2UpSprite     = $this->bitmapLoader->loadSprite('joy_up',   35,  6);

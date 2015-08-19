@@ -4,6 +4,8 @@
 namespace stigsb\pixelpong\server;
 
 
+use Interop\Container\ContainerInterface;
+
 class MainGameLoop extends BaseGameLoop
 {
     /** base speed in pixels per second */
@@ -44,6 +46,8 @@ class MainGameLoop extends BaseGameLoop
     const PADDLE_DISTANCE_TO_SIDES = 1.0;
 
     const BALL_SPEEDUP_EVERY_N_SECS = 10;
+
+    const BALL_SPEEDUP_FACTOR = 1.10;
 
     /** @var int */
     private $displayWidth;
@@ -116,9 +120,9 @@ class MainGameLoop extends BaseGameLoop
 
     private $lastSpeedupTimestamp;
 
-    public function __construct(FrameBuffer $frameBuffer)
+    public function __construct(FrameBuffer $frameBuffer, ContainerInterface $container)
     {
-        parent::__construct($frameBuffer);
+        parent::__construct($frameBuffer, $container);
         $this->initializeGame($frameBuffer);
     }
 
@@ -145,7 +149,7 @@ class MainGameLoop extends BaseGameLoop
             self::RIGHT => (double)(self::$paddlePosX[self::RIGHT] - $this->paddleWidth),
         ];
         $this->ballEdgeLimitY = [
-            self::TOP => 0.0,
+            self::TOP => 1.0,
             self::BOTTOM => (double)($this->displayHeight - $this->ballHeight),
         ];
         $this->frameTimestamp = microtime(true);
@@ -403,8 +407,8 @@ class MainGameLoop extends BaseGameLoop
         $timeSinceLast = $currentMicrotime - $this->lastSpeedupTimestamp;
         printf("timeSinceLast=%f\n", $timeSinceLast);
         if ($timeSinceLast >= self::BALL_SPEEDUP_EVERY_N_SECS) {
-            $this->ballDelta[self::X] *= 1.05;
-            $this->ballDelta[self::Y] *= 1.05;
+            $this->ballDelta[self::X] *= self::BALL_SPEEDUP_FACTOR;
+            $this->ballDelta[self::Y] *= self::BALL_SPEEDUP_FACTOR;
             $this->lastSpeedupTimestamp = $currentMicrotime;
             printf("Speeding up ball!\n");
         }

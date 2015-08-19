@@ -1,45 +1,29 @@
 #!/bin/sh
 exec php -d output_buffering=1 -d display_errors=1 -d memory_limit=128M $0 $@
 <?php
-use stigsb\pixelpong\server\Event;
 
 ob_end_clean();
 
-require dirname(__DIR__) . '/vendor/autoload.php';
-
-$options = getopt('p:h');
-$port  = isset($options['p']) ? (int)$options['p'] : 4432;
+/** @var DI\Container $container */
+$container = require dirname(__DIR__) . '/src/bootstrap.php';
+$container->set(Interop\Container\ContainerInterface::class, $container);
+$options = getopt('f:p:h');
+if (isset($options['p'])) {
+    $container->set('server.port', (int)$options['p']);
+}
+if (isset($options['f'])) {
+    $container->set('server.fps', (double)$options['f']);
+}
 
 $loop = React\EventLoop\Factory::create();
+$container->set(React\EventLoop\LoopInterface::class, $loop);
 
 $socket = new React\Socket\Server($loop);
-$socket->listen($port, '0.0.0.0');
+$socket->listen((int)$container->get('server.port'), $container->get('server.bind_addr'));
 
-$w = 47;
-$h = 27;
-$frame_buffer = new \stigsb\pixelpong\server\OffscreenFrameBuffer($w, $h);
-$game_server = new \stigsb\pixelpong\server\GameServer($loop, $frame_buffer);
-//$loop->addPeriodicTimer(0.5, function(\React\EventLoop\Timer\TimerInterface $timer) use ($game_server) {
-//    $ix = time() % 4;
-//    switch ($ix) {
-//        case 0:
-//            $game_server->onEvent(new Event(Event::DEVICE_JOY_1, Event::JOY_AXIS_Y, Event::AXIS_DOWN));
-//            $game_server->onEvent(new Event(Event::DEVICE_JOY_2, Event::JOY_AXIS_Y, Event::AXIS_NEUTRAL));
-//            break;
-//        case 1:
-//            $game_server->onEvent(new Event(Event::DEVICE_JOY_1, Event::JOY_AXIS_Y, Event::AXIS_NEUTRAL));
-//            $game_server->onEvent(new Event(Event::DEVICE_JOY_2, Event::JOY_AXIS_Y, Event::AXIS_DOWN));
-//            break;
-//        case 2:
-//            $game_server->onEvent(new Event(Event::DEVICE_JOY_1, Event::JOY_AXIS_Y, Event::AXIS_UP));
-//            $game_server->onEvent(new Event(Event::DEVICE_JOY_2, Event::JOY_AXIS_Y, Event::AXIS_NEUTRAL));
-//            break;
-//        case 3:
-//            $game_server->onEvent(new Event(Event::DEVICE_JOY_1, Event::JOY_AXIS_Y, Event::AXIS_NEUTRAL));
-//            $game_server->onEvent(new Event(Event::DEVICE_JOY_2, Event::JOY_AXIS_Y, Event::AXIS_UP));
-//            break;
-//    }
-//});
+$frame_buffer = $container->get(stigsb\pixelpong\server\FrameBuffer::class);
+//$game_server = new stigsb\pixelpong\server\GameServer($loop, $frame_buffer);
+$game_server = $container->get(stigsb\pixelpong\server\GameServer::class);
 
 $io_server = new Ratchet\Server\IoServer(
     new Ratchet\Http\HttpServer(
@@ -49,6 +33,6 @@ $io_server = new Ratchet\Server\IoServer(
     $loop
 );
 
-printf("Listening to port %d\n", $port);
+printf("Listening to port %d\n", $container->get('server.port'));
 
 $loop->run();
