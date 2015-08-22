@@ -1,10 +1,14 @@
 <?php
 
 
-namespace stigsb\pixelpong\server;
+namespace stigsb\pixelpong\gameloop;
 
 
 use Interop\Container\ContainerInterface;
+use stigsb\pixelpong\frame\FrameBuffer;
+use stigsb\pixelpong\gameloop\BaseGameLoop;
+use stigsb\pixelpong\server\Event;
+use stigsb\pixelpong\bitmap\Sprite;
 
 class MainGameLoop extends BaseGameLoop
 {

@@ -21,7 +21,7 @@ $container->set(React\EventLoop\LoopInterface::class, $loop);
 $socket = new React\Socket\Server($loop);
 $socket->listen((int)$container->get('server.port'), $container->get('server.bind_addr'));
 
-$frame_buffer = $container->get(stigsb\pixelpong\server\FrameBuffer::class);
+$frame_buffer = $container->get(\stigsb\pixelpong\frame\FrameBuffer::class);
 //$game_server = new stigsb\pixelpong\server\GameServer($loop, $frame_buffer);
 $game_server = $container->get(stigsb\pixelpong\server\GameServer::class);
 

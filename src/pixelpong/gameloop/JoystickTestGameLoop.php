@@ -1,24 +1,25 @@
 <?php
 
-
-namespace stigsb\pixelpong\server;
-
+namespace stigsb\pixelpong\gameloop;
 
 use Interop\Container\ContainerInterface;
+use stigsb\pixelpong\frame\FrameBuffer;
+use stigsb\pixelpong\server\Event;
+use stigsb\pixelpong\bitmap\Sprite;
 
 class JoystickTestGameLoop extends BaseGameLoop
 {
 
-    /** @var Sprite */
+    /** @var \stigsb\pixelpong\bitmap\Sprite */
     private $p1UpSprite;
 
-    /** @var Sprite */
+    /** @var \stigsb\pixelpong\bitmap\Sprite */
     private $p1DownSprite;
 
     /** @var Sprite */
     private $p2UpSprite;
 
-    /** @var Sprite */
+    /** @var \stigsb\pixelpong\bitmap\Sprite */
     private $p2DownSprite;
 
     public function __construct(FrameBuffer $frameBuffer, ContainerInterface $container)

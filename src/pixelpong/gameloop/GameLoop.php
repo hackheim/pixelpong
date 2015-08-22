@@ -1,8 +1,8 @@
 <?php
 
+namespace stigsb\pixelpong\gameloop;
 
-namespace stigsb\pixelpong\server;
-
+use stigsb\pixelpong\server\Event;
 
 interface GameLoop
 {

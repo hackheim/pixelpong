@@ -1,10 +1,11 @@
 <?php
 
-
-namespace stigsb\pixelpong\server;
-
+namespace stigsb\pixelpong\gameloop;
 
 use Interop\Container\ContainerInterface;
+use stigsb\pixelpong\frame\FrameBuffer;
+use stigsb\pixelpong\server\Event;
+use stigsb\pixelpong\server\GameServer;
 
 class PressStartToPlayGameLoop extends BaseGameLoop
 {

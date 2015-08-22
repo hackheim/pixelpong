@@ -1,8 +1,10 @@
 <?php
 
 
-namespace stigsb\pixelpong\server;
+namespace stigsb\pixelpong\frame;
 
+
+use stigsb\pixelpong\bitmap\Bitmap;
 
 interface FrameBuffer
 {

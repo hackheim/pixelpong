@@ -1,8 +1,10 @@
 <?php
 
+namespace stigsb\pixelpong\bitmap;
 
-namespace stigsb\pixelpong\server;
-
+use stigsb\pixelpong\bitmap\Bitmap;
+use stigsb\pixelpong\server\Color;
+use stigsb\pixelpong\bitmap\Sprite;
 
 class BitmapLoader
 {

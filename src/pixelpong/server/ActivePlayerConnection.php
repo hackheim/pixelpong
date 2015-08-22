@@ -4,6 +4,8 @@
 namespace stigsb\pixelpong\server;
 
 
+use stigsb\pixelpong\frame\FrameEncoder;
+
 class ActivePlayerPlayerConnection implements PlayerConnection
 {
     /** @var FrameEncoder */

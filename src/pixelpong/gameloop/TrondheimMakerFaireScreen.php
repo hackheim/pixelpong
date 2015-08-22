@@ -1,8 +1,10 @@
 <?php
 
+namespace stigsb\pixelpong\gameloop;
 
-namespace stigsb\pixelpong\server;
-
+use stigsb\pixelpong\bitmap\BitmapLoader;
+use stigsb\pixelpong\frame\FrameBuffer;
+use stigsb\pixelpong\server\Event;
 
 class TrondheimMakerFaireScreen implements GameLoop
 {

@@ -1,8 +1,6 @@
 <?php
 
-
-namespace stigsb\pixelpong\server;
-
+namespace stigsb\pixelpong\frame;
 
 class OffscreenFrameBufferTest extends \PHPUnit_Framework_TestCase
 {

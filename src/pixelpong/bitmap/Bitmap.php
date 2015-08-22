@@ -1,7 +1,7 @@
 <?php
 
 
-namespace stigsb\pixelpong\server;
+namespace stigsb\pixelpong\bitmap;
 
 
 class Bitmap

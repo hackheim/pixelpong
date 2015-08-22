@@ -7,6 +7,10 @@ use Ratchet\ConnectionInterface;
 use Ratchet\MessageComponentInterface;
 use React\EventLoop\LoopInterface;
 use React\EventLoop\Timer\TimerInterface;
+use stigsb\pixelpong\frame\FrameBuffer;
+use stigsb\pixelpong\frame\JsonFrameEncoder;
+use stigsb\pixelpong\gameloop\GameLoop;
+use stigsb\pixelpong\gameloop\PressStartToPlayGameLoop;
 
 class GameServer implements MessageComponentInterface
 {

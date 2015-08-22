@@ -1,14 +1,11 @@
 <?php
 
+namespace stigsb\pixelpong\frame;
 
-namespace stigsb\pixelpong\server;
-
-
-class AsciiFrameEncoderTest extends \PHPUnit_Framework_TestCase
+class JsonFrameEncoderTest extends \PHPUnit_Framework_TestCase
 {
     const TEST_HEIGHT = 3;
     const TEST_WIDTH = 7;
-    const TEST_BLANK_ENCODED = ".......\n.......\n.......";
 
     /** @var FrameBuffer|\PHPUnit_Framework_MockObject_MockObject */
     private $frameBuffer;
@@ -22,25 +19,20 @@ class AsciiFrameEncoderTest extends \PHPUnit_Framework_TestCase
         $this->frameBuffer = $this->getMock(FrameBuffer::class);
         $this->frameBuffer->expects($this->any())->method('getHeight')->willReturn(self::TEST_HEIGHT);
         $this->frameBuffer->expects($this->any())->method('getWidth')->willReturn(self::TEST_WIDTH);
-        $this->encoder = new AsciiFrameEncoder($this->frameBuffer);
+        $this->encoder = new JsonFrameEncoder($this->frameBuffer);
     }
 
-    public function testEncodeFrame()
+    public function testEncode()
     {
         $num_pixels = self::TEST_WIDTH * self::TEST_HEIGHT;
         $frame = \SplFixedArray::fromArray(array_fill(0, $num_pixels, 0));
-        $set_pixels = [2 => 2, 3 => 3, 9 => 10, 10 => 11];
-        $expected = self::TEST_BLANK_ENCODED;
-        foreach ($set_pixels as $sp => $ep) {
+        $set_pixels = [2, 3, 9, 10];
+        $expected = ['frame' => []];
+        foreach ($set_pixels as $sp) {
             $frame[$sp] = 1;
-            $expected[$ep] = AsciiFrameEncoder::ENCODED_PIXEL_ON;
+            $expected['frame'][(string)$sp] = JsonFrameEncoder::COLOR_FG;
         }
-        $this->assertEquals($expected, $this->encoder->encodeFrame($frame));
-    }
-
-    public function testEncodeFrameInfo()
-    {
-        $this->assertEquals('', $this->encoder->encodeFrameInfo($this->frameBuffer));
+        $this->assertEquals(json_encode($expected), $this->encoder->encodeFrame($frame));
     }
 
 }

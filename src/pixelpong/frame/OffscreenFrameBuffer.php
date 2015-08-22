@@ -1,8 +1,8 @@
 <?php
 
+namespace stigsb\pixelpong\frame;
 
-namespace stigsb\pixelpong\server;
-
+use stigsb\pixelpong\bitmap\Bitmap;
 
 class OffscreenFrameBuffer implements FrameBuffer
 {

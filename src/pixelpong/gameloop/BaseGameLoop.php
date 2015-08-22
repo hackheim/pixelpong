@@ -1,23 +1,24 @@
 <?php
 
-
-namespace stigsb\pixelpong\server;
-
+namespace stigsb\pixelpong\gameloop;
 
 use Interop\Container\ContainerInterface;
+use stigsb\pixelpong\bitmap\BitmapLoader;
+use stigsb\pixelpong\frame\FrameBuffer;
+use stigsb\pixelpong\bitmap\Sprite;
 
 abstract class BaseGameLoop implements GameLoop
 {
-    /** @var FrameBuffer */
+    /** @var \stigsb\pixelpong\frame\FrameBuffer */
     protected $frameBuffer;
 
-    /** @var BitmapLoader */
+    /** @var \stigsb\pixelpong\bitmap\BitmapLoader */
     protected $bitmapLoader;
 
-    /** @var Bitmap */
+    /** @var \stigsb\pixelpong\bitmap\Bitmap */
     protected $background;
 
-    /** @var Sprite[] */
+    /** @var \stigsb\pixelpong\bitmap\Sprite[] */
     protected $sprites;
 
     /** @var ContainerInterface */

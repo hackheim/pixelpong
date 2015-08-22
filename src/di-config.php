@@ -2,8 +2,8 @@
 
 use Ratchet\Http\HttpServerInterface;
 use React\Socket\ServerInterface;
-use stigsb\pixelpong\server\FrameBuffer;
-use stigsb\pixelpong\server\OffscreenFrameBuffer;
+use stigsb\pixelpong\frame\FrameBuffer;
+use stigsb\pixelpong\frame\OffscreenFrameBuffer;
 
 return [
     'framebuffer.width'                 => 47,
