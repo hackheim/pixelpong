@@ -1,8 +1,6 @@
 <?php
 
-
 namespace stigsb\pixelpong\frame;
-
 
 use stigsb\pixelpong\bitmap\Bitmap;
 

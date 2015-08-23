@@ -9,17 +9,17 @@ class FontLoader
 
     private $fontDir;
 
-    public function __construct(BitmapLoader $bitmapLoader)
+    public function __construct($fontDir)
     {
-        $this->fontDir = realpath(__DIR__ . '/../../../res/fonts');
+        $this->fontDir = $fontDir;
     }
 
     public function loadFont($name)
     {
         $png_file = "{$this->fontDir}/{$name}.png";
         $image = imagecreatefrompng($png_file);
-        $sx = imagesx($image);
-        $sy = imagesy($image);
+//        $sx = imagesx($image);
+//        $sy = imagesy($image);
         $font_meta = $this->getFontMetaData($name);
         $oy = 0;
         $char_pixels = $font_meta->width * $font_meta->height;
@@ -33,18 +33,14 @@ class FontLoader
                 if ($charLine[$i] == $font_meta->blankChar) {
                     continue;
                 }
-                printf("Character: '%s' at [%d,%d]\n", $charLine[$i], $ox, $oy);
                 $pixels = \SplFixedArray::fromArray(array_fill(0, $char_pixels, Font::BG));
                 for ($y = 0; $y < $font_meta->height; ++$y) {
-//                    print " |";
                     for ($x = 0; $x < $font_meta->width; ++$x) {
-//                        printf(" %08x", imagecolorat($image, $ox+$x, $oy+$y));
                         if (imagecolorat($image, $ox + $x, $oy + $y) == $pixel_color) {
                             $pixels[($y * $font_meta->width) + $x] = Font::FG;
                         }
                     }
                 }
-//                print "\n";
                 $character_bitmaps[ord($charLine[$i])] = $pixels;
             }
             $oy += $font_meta->height + $font_meta->charSpacing[1];

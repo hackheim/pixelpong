@@ -2,7 +2,7 @@
 
 namespace stigsb\pixelpong\bitmap;
 
-class TextBitmap extends Bitmap
+class TextBitmap extends SimpleBitmap
 {
     /**
      * @param Font $font

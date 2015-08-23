@@ -1,10 +1,6 @@
 <?php
 
-
 namespace stigsb\pixelpong\bitmap;
-
-
-use stigsb\pixelpong\bitmap\Bitmap;
 
 class Sprite
 {

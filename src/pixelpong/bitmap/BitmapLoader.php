@@ -2,9 +2,7 @@
 
 namespace stigsb\pixelpong\bitmap;
 
-use stigsb\pixelpong\bitmap\Bitmap;
 use stigsb\pixelpong\server\Color;
-use stigsb\pixelpong\bitmap\Sprite;
 
 class BitmapLoader
 {
@@ -86,7 +84,7 @@ class BitmapLoader
                 $pixels[($y * $width) + $x] = self::$colorMap[$line[$x]];
             }
         }
-        return new Bitmap($width, $height, $pixels);
+        return new SimpleBitmap($width, $height, $pixels);
     }
 
 //    /**
