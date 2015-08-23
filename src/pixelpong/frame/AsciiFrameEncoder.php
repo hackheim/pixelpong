@@ -2,6 +2,9 @@
 
 namespace stigsb\pixelpong\frame;
 
+use stigsb\pixelpong\bitmap\BitmapLoader;
+use stigsb\pixelpong\server\Color;
+
 class AsciiFrameEncoder implements FrameEncoder
 {
     const ENCODED_PIXEL_OFF = '.';
@@ -13,6 +16,9 @@ class AsciiFrameEncoder implements FrameEncoder
     /** @var int */
     private $height;
 
+    /** @var array */
+    private $colorCharMap;
+
     public function __construct(FrameBuffer $frameBuffer)
     {
         $this->width = $frameBuffer->getWidth();
@@ -23,6 +29,7 @@ class AsciiFrameEncoder implements FrameEncoder
         for ($i = $this->width; $i < $encodedSize; $i += ($this->width + 1)) {
             $this->blankEncodedFrame[$i] = "\n";
         }
+        $this->colorCharMap = array_flip(BitmapLoader::$colorMap);
     }
 
     public function encodeFrame(\SplFixedArray $frame)
@@ -30,10 +37,11 @@ class AsciiFrameEncoder implements FrameEncoder
         $pixels = $this->blankEncodedFrame;
         for ($y = 0; $y < $this->height; ++$y) {
             for ($x = 0; $x < $this->width; ++$x) {
-                if ($frame[($this->width * $y) + $x] !== self::PIXEL_BG) {
-                    $ix = (($this->width + 1) * $y) + $x;
-                    $pixels[$ix] = self::ENCODED_PIXEL_ON;
+                $color = $frame[($this->width * $y) + $x];
+                if ($color == Color::TRANSPARENT) {
+                    continue;
                 }
+                $pixels[(($this->width + 1) * $y) + $x] = isset($this->colorCharMap[$color]) ? $this->colorCharMap[$color] : ' ';
             }
         }
         return $pixels;
