@@ -6,7 +6,7 @@ use stigsb\pixelpong\server\Color;
 
 class BitmapLoader
 {
-    private static $colorMap = [
+    public static $colorMap = [
         ' ' => Color::TRANSPARENT,
         '.' => Color::BLACK,
         'x' => Color::GREY,
