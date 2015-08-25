@@ -9,12 +9,43 @@ class BitmapLoader
     public static $colorMap = [
         ' ' => Color::TRANSPARENT,
         '.' => Color::BLACK,
-        'x' => Color::GREY,
-        'g' => Color::DARK_GREY,
-        'G' => Color::LIGHT_GREY,
+        '0' => Color::BLACK,
         '#' => Color::WHITE,
+        '1' => Color::WHITE,
+        '2' => Color::RED,
+        '3' => Color::CYAN,
+        '4' => Color::PURPLE,
+        '5' => Color::GREEN,
+        '6' => Color::BLUE,
+        '7' => Color::YELLOW,
+        '8' => Color::ORANGE,
+        '9' => Color::BROWN,
+        'a' => Color::LIGHT_RED,
+        'b' => Color::DARK_GREY,
+        'c' => Color::GREY,
+        'd' => Color::LIGHT_GREEN,
+        'e' => Color::LIGHT_BLUE,
+        'f' => Color::LIGHT_GREY,
     ];
 
+/*
+    const BLACK         = 0;
+    const WHITE         = 1;
+    const RED           = 2;
+    const CYAN          = 3;
+    const PURPLE        = 4;
+    const GREEN         = 5;
+    const BLUE          = 6;
+    const YELLOW        = 7;
+    const ORANGE        = 8;
+    const BROWN         = 9;
+    const LIGHT_RED     = 10;
+    const DARK_GREY     = 11;
+    const GREY          = 12;
+    const LIGHT_GREEN   = 13;
+    const LIGHT_BLUE    = 14;
+    const LIGHT_GREY    = 15;
+*/
     /** @var array[string]Bitmap */
     private $bitmapCache;
 
