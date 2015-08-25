@@ -10,7 +10,7 @@ use React\EventLoop\Timer\TimerInterface;
 use stigsb\pixelpong\frame\FrameBuffer;
 use stigsb\pixelpong\frame\JsonFrameEncoder;
 use stigsb\pixelpong\gameloop\GameLoop;
-use stigsb\pixelpong\gameloop\PressStartToPlayGameLoop;
+use stigsb\pixelpong\gameloop\TestImageScreen;
 
 class GameServer implements MessageComponentInterface
 {
@@ -37,7 +37,7 @@ class GameServer implements MessageComponentInterface
         $this->connections = new \SplObjectStorage();
         $fps = (double)$container->get('server.fps');
         $this->update_timer = $this->loop->addPeriodicTimer(1.0/$fps, [$this, 'onFrameUpdate']);
-        $this->switchToGameLoop($container->get(PressStartToPlayGameLoop::class));
+        $this->switchToGameLoop($container->get(TestImageScreen::class));
     }
 
     /**
@@ -80,7 +80,7 @@ class GameServer implements MessageComponentInterface
      */
     public function onError(ConnectionInterface $conn, \Exception $e)
     {
-        printf("ERROR\n");
+        printf("ERROR: %s\n", $e->getMessage());
     }
 
     /**

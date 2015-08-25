@@ -2,6 +2,7 @@
 
 use Ratchet\Http\HttpServerInterface;
 use React\Socket\ServerInterface;
+use stigsb\pixelpong\bitmap\FontLoader;
 use stigsb\pixelpong\frame\FrameBuffer;
 use stigsb\pixelpong\frame\OffscreenFrameBuffer;
 
@@ -18,4 +19,6 @@ return [
         ),
     ServerInterface::class              => DI\object(React\Socket\Server::class),
     HttpServerInterface::class          => DI\object(Ratchet\WebSocket\WsServer::class),
+    FontLoader::class                   => DI\object(FontLoader::class)
+        ->constructor(dirname(__DIR__) . '/res/fonts'),
 ];

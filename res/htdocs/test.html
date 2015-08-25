@@ -7,15 +7,19 @@
 <body bgcolor="#000000">
 <script language="javascript" type="text/javascript">
   var wsUri = "ws://localhost:4432/";
+  var websocket;
   var output;
-  var width = 0;
-  var height = 0;
+  var numPixelsX = 0;
+  var numPixelsY = 0;
   var canvas;
   var ctx, pctx;
   var frameCounter = 0;
   var palette;
   var currentColor;
   var retryInterval;
+  var pixelSizeX = 8;
+  var pixelSizeY = 6;
+
   var keyDownEventMap = {
     '32' /* space */: {'device': 1, 'eventType': 3, 'value':  1},
     '65' /* a */: {'device': 1, 'eventType': 2, 'value': -1},
@@ -41,8 +45,6 @@
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
     switchToColor('#000000');
-//    ctx.fillRect(0, 0, 2000, 162);
-    ctx.fillRect(0, 0, 800, 600);
     var pcanvas = document.getElementById('palette');
     if (pcanvas) {
       pctx = pcanvas.getContext('2d');
@@ -88,12 +90,11 @@
   }
 
   function onMessage(evt) {
-//    replaceOutput(evt.data)
-//    return;
     var message = JSON.parse(evt.data);
     if (message.frameInfo) {
-      width = message.frameInfo.width;
-      height = message.frameInfo.height;
+      numPixelsX = message.frameInfo.width;
+      numPixelsY = message.frameInfo.height;
+      resizeCanvas(numPixelsX, numPixelsY);
       palette = message.frameInfo.palette;
       if (pctx) {
         for (var i = 0; i < palette.length; ++i) {
@@ -101,24 +102,28 @@
           pctx.fillRect(0, i * 15, 40, 15);
         }
       }
-//      writeToScreen('<span style="color: blue;">Frame Info: ' + evt.data + '</span>');
     }
+    var pixelsDrawn = 0;
     if (message.frame) {
       switchToColor('#000000');
-      ctx.fillRect(0, 0, 800, 600);
-      var pixelsDrawn = 0;
-      for (var ix in message.frame) {
-        var x = ix % width;
-        var y = Math.floor(ix / width);
-        switchToColorIndex(message.frame[ix]);
-        ctx.fillRect((x * 8), (y * 6), 8, 6);
-        ++pixelsDrawn;
-      }
-//      replaceOutput(pixelsDrawn + ' pixels drawn');
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      pixelsDrawn += drawPixels(message.frame);
     }
+    if (message.frameDelta) {
+      pixelsDrawn += drawPixels(message.frame);
+    }
+  }
 
-    //writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data+'</span>');
-    //websocket.close();
+  function drawPixels(pixels) {
+    var pixelsDrawn = 0;
+    for (var ix in pixels) {
+      x = ix % numPixelsX;
+      y = Math.floor(ix / numPixelsX);
+      switchToColorIndex(pixels[ix]);
+      ctx.fillRect((x * pixelSizeX), (y * pixelSizeY), pixelSizeX, pixelSizeY);
+      ++pixelsDrawn;
+    }
+    return pixelsDrawn;
   }
 
   function onError(evt) {
@@ -126,8 +131,8 @@
   }
 
   function doSend(message) {
-    replaceOutput("SENT: " + message);
     websocket.send(message);
+    replaceOutput("SENT: " + message);
   }
 
   function switchToColor(color) {
@@ -149,6 +154,12 @@
     pre.style.wordWrap = "break-word";
     pre.innerHTML = message;
     output.appendChild(pre);
+  }
+
+  function resizeCanvas(x, y) {
+    canvas.width = x * pixelSizeX;
+    canvas.height = y * pixelSizeY;
+    writeToScreen('Resized canvas to ' + canvas.width + ' x ' + canvas.height + ' px');
   }
 
   window.addEventListener("load", init, false);
