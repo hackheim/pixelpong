@@ -70,9 +70,11 @@ class ScrollingBitmap implements Bitmap
         $maxx = min($this->width, $origw - $this->xOffset);
         $maxy = min($this->height, $origh - $this->yOffset);
         for ($y = 0; $y < $maxy; ++$y) {
-            $oy = $this->yOffset = $y;
+            $oy = $this->yOffset + $y;
+            if ($oy < 0) continue;
             for ($x = 0; $x < $maxx; ++$x) {
                 $ox = $this->xOffset + $x;
+                if ($ox < 0) continue;
                 $pixels[($y * $this->width) + $x] = $origpixels[($oy * $origw) + $ox];
             }
         }
