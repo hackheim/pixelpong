@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <title>pixelpong</title>
 </head>
-<body bgcolor="#000000">
+<body bgcolor="#000000" color="#ffffff">
 <script language="javascript" type="text/javascript">
-  var wsUri = "ws://localhost:4432/";
+  var wsUri = 'ws://' + ((location.hostname == '') ? 'localhost' : location.hostname) + ':4432/';
   var websocket;
   var output;
   var numPixelsX = 0;
@@ -69,15 +69,16 @@
         activeAxes[devaxis] = false;
       }
     });
-    testWebSocket();
+    doConnect();
   }
 
-  function testWebSocket() {
+  function doConnect() {
     websocket = new WebSocket(wsUri);
     websocket.onopen = function(evt) { onOpen(evt) };
     websocket.onclose = function(evt) { onClose(evt) };
     websocket.onmessage = function(evt) { onMessage(evt) };
     websocket.onerror = function(evt) { onError(evt) };
+    canvas.focus();
   }
 
   function onOpen(evt) {
@@ -86,7 +87,7 @@
   }
 
   function onClose(evt) {
-    writeToScreen("DISCONNECTED");
+    writeToScreen("DISCONNECTED: " + evt.code);
   }
 
   function onMessage(evt) {
@@ -127,7 +128,8 @@
   }
 
   function onError(evt) {
-    writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+    replaceOutput('<span style="color: red;">ERROR:</span> ' + JSON.stringify(evt));
+    setTimeout(doConnect, 1000);
   }
 
   function doSend(message) {
@@ -162,11 +164,20 @@
     writeToScreen('Resized canvas to ' + canvas.width + ' x ' + canvas.height + ' px');
   }
 
+  function doRestartServer() {
+    canvas.focus();
+    doSend('{"command":"restart"}');
+    websocket.close();
+    setTimeout(doConnect, 1100);
+  }
+
   window.addEventListener("load", init, false);
 </script>
 
-<canvas width="800" height="600" id="canvas"></canvas>
+<canvas width="470" height="270" id="canvas"></canvas>
+<br />
+<button onClick="doConnect()">RECONNECT</button>
+<button onClick="doRestartServer()">RESTART SERVER</button>
 <div style="font-family: monospace"><pre id="output"></pre></div>
-
 </body>
 </html>

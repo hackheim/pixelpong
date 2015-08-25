@@ -107,6 +107,12 @@ class GameServer implements MessageComponentInterface
             $this->onEvent($event);
         }
         printf("incoming message: $rawmsg\n");
+        if (isset($msg->command)) {
+            switch ($msg->command) {
+                case 'restart':
+                    die("Restarting on request from client!\n");
+            }
+        }
     }
 
     function onFrameUpdate(TimerInterface $timer)
