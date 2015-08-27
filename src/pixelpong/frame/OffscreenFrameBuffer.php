@@ -142,9 +142,13 @@ class OffscreenFrameBuffer implements FrameBuffer
             $w = $sprite->getWidth();
             $h = $sprite->getHeight();
             for ($x = 0; $x < $w; ++$x) {
+                $xx = $xoff + $x;
+                if ($xx >= $this->width || $xx < 0) continue;
                 for ($y = 0; $y < $h; ++$y) {
+                    $yy = $yoff + $y;
+                    if ($y >= $this->height || $yy < 0) continue;
                     $pixel = $pixels[($y * $w) + $x];
-                    $this->setPixel($x + $xoff, $y + $yoff, $pixel);
+                    $this->setPixel($xx, $y + $yoff, $pixel);
                 }
             }
         }

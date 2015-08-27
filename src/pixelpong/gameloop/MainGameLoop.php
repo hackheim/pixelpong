@@ -53,6 +53,8 @@ class MainGameLoop extends BaseGameLoop
 
     const BALL_SPEEDUP_FACTOR = 1.10;
 
+    const FRAME_EDGE_SIZE = 1.0;
+
     /** @var int */
     private $displayWidth;
 
@@ -86,7 +88,10 @@ class MainGameLoop extends BaseGameLoop
     /** @var double[] */
     private $ballPos;
 
-    /** @var int */
+    /** @var double */
+    private $paddleMinY;
+
+    /** @var double */
     private $paddleMaxY;
 
     /** @var int */
@@ -143,11 +148,13 @@ class MainGameLoop extends BaseGameLoop
         $this->addSprite($this->paddles[self::RIGHT]);
         $this->paddleHeight = $this->paddles[self::LEFT]->getBitmap()->getHeight();
         $this->paddleWidth = $this->paddles[self::LEFT]->getBitmap()->getWidth();
-        $this->paddleMaxY = $this->displayHeight - $this->paddleHeight;
+        $this->paddleMinY = self::FRAME_EDGE_SIZE;
+        $this->paddleMaxY = $this->displayHeight - $this->paddleHeight - self::FRAME_EDGE_SIZE;
         $this->ball = $this->bitmapLoader->loadSprite('ball');
         $this->addSprite($this->ball);
         $this->ballHeight = $this->ball->getBitmap()->getHeight();
         $this->ballWidth = $this->ball->getBitmap()->getWidth();
+        self::$paddlePosX[self::RIGHT] = $this->displayWidth - 1.0 - $this->paddleWidth;
         $this->ballPaddleLimitX = [
             self::LEFT => (double)(self::$paddlePosX[self::LEFT] + $this->paddleWidth),
             self::RIGHT => (double)(self::$paddlePosX[self::RIGHT] - $this->paddleWidth),
@@ -318,8 +325,8 @@ class MainGameLoop extends BaseGameLoop
         $now_us = $this->getCurrentMicrotime();
         $elapsed = $now_us - $this->lastYAxisUpdateTime[$paddle];
         $new_pos = $this->paddlePositions[$paddle] + ((double)self::PADDLE_SPEED * $elapsed * $this->currentYAxis[$paddle]);
-        if ($new_pos < 0) {
-            $new_pos = 0;
+        if ($new_pos < $this->paddleMinY) {
+            $new_pos = $this->paddleMinY;
         } elseif ($new_pos > $this->paddleMaxY) {
             $new_pos = $this->paddleMaxY;
         }

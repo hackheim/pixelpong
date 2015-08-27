@@ -28,7 +28,7 @@ abstract class BaseGameLoop implements GameLoop
     {
         $this->frameBuffer = $frameBuffer;
         $this->container = $container;
-        $this->bitmapLoader = new BitmapLoader(dirname(dirname(dirname(__DIR__))) . '/res/sprites');
+        $this->bitmapLoader = $container->get(BitmapLoader::class);
         $this->sprites = [];
     }
 

@@ -49,12 +49,15 @@ class BitmapLoader
     /** @var array[string]Bitmap */
     private $bitmapCache;
 
-    /** @var string  directory where bitmap files are stored */
-    private $bitmapDir;
+    /** @var string[]  list of directories where bitmap files may be found */
+    private $bitmapPath;
 
-    public function __construct($bitmapDir)
+    /**
+     * @param string $bitmapPath  colon-separated list of directories in which bitmaps are found
+     */
+    public function __construct($bitmapPath)
     {
-        $this->bitmapDir = $bitmapDir;
+        $this->bitmapPath = explode(':', $bitmapPath);
         $this->bitmapCache = [];
     }
 
@@ -76,25 +79,22 @@ class BitmapLoader
      */
     public function loadBitmap($name) {
         if (!isset($this->bitmapCache[$name])) {
-            $file_without_ext = "{$this->bitmapDir}/{$name}";
-            if (file_exists("{$file_without_ext}.txt")) {
-                $this->bitmapCache[$name] = $this->loadBitmapFromTextFile("{$file_without_ext}.txt");
+            $file = $this->findBitmapFileInPath($name);
+            if ($file) {
+                $this->bitmapCache[$name] = $this->loadBitmapFromFile($file);
             }
         }
         if (!isset($this->bitmapCache[$name])) {
             throw new \RuntimeException("bitmap not found: {$name}");
         }
         return $this->bitmapCache[$name];
-//        if (file_exists("{$this->bitmapDir}/{$name}.gif")) {
-//            return $this->loadSpriteFromGifFile("{$this->bitmapDir}/{$name}.gif");
-//        }
     }
 
     /**
      * @param string $file  bitmap file (.txt extension)
      * @return Bitmap
      */
-    protected function loadBitmapFromTextFile($file) {
+    protected function loadBitmapFromFile($file) {
         $lines = [];
         $width = 0;
         foreach (file($file) as $line) {
@@ -118,6 +118,20 @@ class BitmapLoader
         return new SimpleBitmap($width, $height, $pixels);
     }
 
+    /**
+     * @param string $bitmapName
+     * @return string|null
+     */
+    protected function findBitmapFileInPath($bitmapName)
+    {
+        foreach ($this->bitmapPath as $dir) {
+            $txt_file = "{$dir}/{$bitmapName}.txt";
+            if (file_exists($txt_file)) {
+                return $txt_file;
+            }
+        }
+        return null;
+    }
 //    /**
 //     * @param string $file  bitmap file (.gif extension)
 //     * @return Sprite

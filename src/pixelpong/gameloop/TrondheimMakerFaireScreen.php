@@ -20,14 +20,13 @@ class TrondheimMakerFaireScreen implements GameLoop
     /** @var int */
     private $currentFrameIndex;
 
-    public function __construct(FrameBuffer $frameBuffer)
+    public function __construct(FrameBuffer $frameBuffer, BitmapLoader $bitmapLoader)
     {
         $this->frameBuffer = $frameBuffer;
-        $spriteLoader = new BitmapLoader(dirname(dirname(dirname(__DIR__))) . '/res/sprites');
         $this->frames = [];
-        foreach (['trondheim', 'maker', 'faire'] as $spriteName) {
-            $sprite = $spriteLoader->loadBitmap($spriteName);
-            $this->frames[] = $sprite->getPixels();
+        foreach (['trondheim', 'maker', 'faire'] as $bitmapName) {
+            $bitmap = $bitmapLoader->loadBitmap($bitmapName);
+            $this->frames[] = $bitmap->getPixels();
         }
     }
 
