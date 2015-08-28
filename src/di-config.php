@@ -16,7 +16,7 @@ return [
     'framebuffer.height'                => $__h,
     'server.port'                       => DI\env('PONG_PORT', '4432'),
     'server.bind_addr'                  => DI\env('PONG_BIND_ADDR', '0.0.0.0'),
-    'server.fps'                        => DI\env('PONG_FPS', '7.0'),
+    'server.fps'                        => DI\env('PONG_FPS', '10.0'),
     FrameBuffer::class                  => DI\object(OffscreenFrameBuffer::class)
         ->constructor(
             DI\get('framebuffer.width'),
