@@ -67,6 +67,12 @@
         var devaxis = eventData.device + '-' + eventData.eventType;
         doSend(JSON.stringify({'event': eventData}));
         activeAxes[devaxis] = false;
+      } else {
+        if (ev.keyCode == 27) {
+          doRestartServer();
+        } else if (ev.keyCode == 49) {
+          doConnect();
+        }
       }
     });
     doConnect();
@@ -176,8 +182,6 @@
 
 <canvas width="470" height="270" id="canvas"></canvas>
 <br />
-<button onClick="doConnect()">RECONNECT</button>
-<button onClick="doRestartServer()">RESTART SERVER</button>
 <div style="font-family: monospace"><pre id="output"></pre></div>
 </body>
 </html>
