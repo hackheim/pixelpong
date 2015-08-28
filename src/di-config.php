@@ -8,8 +8,8 @@ use stigsb\pixelpong\frame\FrameBuffer;
 use stigsb\pixelpong\frame\OffscreenFrameBuffer;
 
 $__topdir = dirname(__DIR__);
-$__w = 30;
-$__h = 24;
+$__w = 47;
+$__h = 27;
 
 return [
     'framebuffer.width'                 => $__w,
