@@ -27,7 +27,7 @@ class Color
 
     protected static $palette = [
 // From http://www.gamebase64.com/forum/viewtopic.php?t=1304&sid=e3569083afbb1c4ad92c3c961a52fb88
-        self::BLACK         => '#191d19',
+        self::BLACK         => '#000000',
         self::WHITE         => '#fcf9fc',
         self::RED           => '#933a4c',
         self::CYAN          => '#b6fafa',

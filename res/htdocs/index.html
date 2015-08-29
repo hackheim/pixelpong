@@ -103,6 +103,7 @@
       numPixelsY = message.frameInfo.height;
       resizeCanvas(numPixelsX, numPixelsY);
       palette = message.frameInfo.palette;
+//      console.log('Palette: ' + palette)
       if (pctx) {
         for (var i = 0; i < palette.length; ++i) {
           pctx.fillStyle = palette[i];
@@ -112,21 +113,35 @@
     }
     var pixelsDrawn = 0;
     if (message.frame) {
-      switchToColor('#000000');
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      pixelsDrawn += drawPixels(message.frame);
+      pixelsDrawn += drawFullFrame(message.frame);
     }
     if (message.frameDelta) {
-      pixelsDrawn += drawPixels(message.frame);
+//      console.log(message.frameDelta);
+      pixelsDrawn += drawFrameDelta(message.frameDelta);
     }
   }
 
-  function drawPixels(pixels) {
+  function drawFullFrame(pixels) {
     var pixelsDrawn = 0;
+    switchToColor('#000000');
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     for (var ix in pixels) {
       x = ix % numPixelsX;
       y = Math.floor(ix / numPixelsX);
       switchToColorIndex(pixels[ix]);
+      ctx.fillRect((x * pixelSizeX), (y * pixelSizeY), pixelSizeX, pixelSizeY);
+      ++pixelsDrawn;
+    }
+    return pixelsDrawn;
+  }
+
+  function drawFrameDelta(pixels) {
+    var pixelsDrawn = 0;
+    for (var ix_str in pixels) {
+      ix = parseInt(ix_str);
+      x = ix % numPixelsX;
+      y = Math.floor(ix / numPixelsX);
+      switchToColorIndex(pixels[ix_str]);
       ctx.fillRect((x * pixelSizeX), (y * pixelSizeY), pixelSizeX, pixelSizeY);
       ++pixelsDrawn;
     }

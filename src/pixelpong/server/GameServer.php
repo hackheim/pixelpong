@@ -136,7 +136,10 @@ class GameServer implements MessageComponentInterface
                 $encodedFrameCache[$key] = $playerConnection->getFrameEncoder()->encodeFrame($frame);
             }
 //            printf("message: %s\n", $encodedFrameCache[$key]);
-            $conn->send($encodedFrameCache[$key]);
+            if ($encodedFrameCache[$key]) {
+                // the encoded frame may be null if there are no changes
+                $conn->send($encodedFrameCache[$key]);
+            }
         }
     }
 

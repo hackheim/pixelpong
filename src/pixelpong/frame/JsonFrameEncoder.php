@@ -15,12 +15,16 @@ class JsonFrameEncoder implements FrameEncoder
     /** @var int */
     private $height;
 
+    /** @var array */
+    private $previousFrame;
+
     public function __construct(FrameBuffer $frameBuffer)
     {
         $this->width = $frameBuffer->getWidth();
         $this->height = $frameBuffer->getHeight();
         $size = $this->width * $this->height;
         $this->blankEncodedFrame = array_fill(0, $size, self::COLOR_BG);
+        $this->previousFrame = array_fill(0, $size, self::COLOR_BG);
     }
 
     /**
@@ -30,14 +34,23 @@ class JsonFrameEncoder implements FrameEncoder
     public function encodeFrame(array $frame)
     {
         $pixels = [];
+        $diff = array_diff_assoc($frame, $this->previousFrame);
+        $this->previousFrame = $frame;
+        if (count($diff) == 0) {
+            return null;
+        }
+        if (count($diff) < (count($frame) / 3)) {
+            // send out a diff if less than ~1/3 of the pixels have changed
+//            printf("Sending delta, %d of %d pixels changed\n", count($diff), count($frame));
+            return json_encode(['frameDelta' => $diff]);
+        }
+//        printf("Sending full frame, %d of %d pixels changed\n", count($diff), count($frame));
         foreach ($frame as $ix => $color) {
             if ($color !== self::PIXEL_BG) {
                 $pixels[(string)$ix] = $color;
             }
         }
-        return json_encode([
-            'frame' => $pixels
-        ]);
+        return json_encode(['frame' => $pixels]);
     }
 
     /**
