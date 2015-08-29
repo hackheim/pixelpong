@@ -12,10 +12,10 @@ class OffscreenFrameBuffer implements FrameBuffer
     /** @var int */
     protected $height;
 
-    /** @var \SplFixedArray */
+    /** @var array */
     protected $blankFrame;
 
-    /** @var \SplFixedArray */
+    /** @var array */
     protected $currentFrame;
 
     /** @var int */
@@ -34,7 +34,7 @@ class OffscreenFrameBuffer implements FrameBuffer
         $this->height = $height;
         $this->frameBufferSize = $width * $height;
         $this->bitmapsToRender = [];
-        $this->setBackgroundFrame(\SplFixedArray::fromArray(array_fill(0, $this->frameBufferSize, 0)));
+        $this->setBackgroundFrame(array_fill(0, $this->frameBufferSize, 0));
         $this->newFrame();
     }
 
@@ -83,7 +83,7 @@ class OffscreenFrameBuffer implements FrameBuffer
     }
 
     /**
-     * @return \SplFixedArray
+     * @return array
      */
     public function getAndSwitchFrame()
     {
@@ -98,12 +98,12 @@ class OffscreenFrameBuffer implements FrameBuffer
      */
     protected function newFrame()
     {
-        $this->currentFrame = clone $this->blankFrame;
+        $this->currentFrame = $this->blankFrame;
         $this->bitmapsToRender = [];
     }
 
     /**
-     * @return \SplFixedArray
+     * @return array
      */
     public function getFrame()
     {
@@ -114,10 +114,10 @@ class OffscreenFrameBuffer implements FrameBuffer
      * Sets the blank frame, which is the frame we will reset to every time
      * the frame is switched. Useful for pre-drawing the board.
      *
-     * @param \SplFixedArray $frame
+     * @param array $frame
      * @return mixed
      */
-    public function setBackgroundFrame(\SplFixedArray $frame)
+    public function setBackgroundFrame(array $frame)
     {
         $this->blankFrame = $frame;
     }

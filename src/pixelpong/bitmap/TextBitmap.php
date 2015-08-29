@@ -19,7 +19,7 @@ class TextBitmap extends SimpleBitmap
         $num_chars = strlen($text);
         $full_width = ($cw * $num_chars) + (($num_chars - 1) * $spacing);
         $full_height = $ch;
-        $pixels = \SplFixedArray::fromArray(array_fill(0, $full_width * $full_height, 0));
+        $pixels = array_fill(0, $full_width * $full_height, 0);
         for ($i = 0; $i < $num_chars; ++$i) {
             $char = ord($text[$i]);
             $cox = ($cw + $spacing) * $i;

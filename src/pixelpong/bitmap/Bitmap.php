@@ -15,7 +15,7 @@ interface Bitmap
     public function getHeight();
 
     /**
-     * @return \SplFixedArray
+     * @return array
      */
     public function getPixels();
 }

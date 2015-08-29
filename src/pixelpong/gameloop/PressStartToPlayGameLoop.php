@@ -9,10 +9,10 @@ use stigsb\pixelpong\server\GameServer;
 
 class PressStartToPlayGameLoop extends BaseGameLoop
 {
-    /** @var \SplFixedArray */
+    /** @var array */
     private $pressStartFrame;
 
-    /** @var \SplFixedArray */
+    /** @var array */
     private $toPlayFrame;
 
     /** @var int */

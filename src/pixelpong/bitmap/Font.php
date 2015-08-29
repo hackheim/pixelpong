@@ -10,7 +10,7 @@ class Font
     const BG = 0;
     const FG = 1;
 
-    /** @var array[string]\SplFixedArray */
+    /** @var array[string]array */
     private $characterBitmaps;
 
     /** @var int  font character width */
@@ -38,7 +38,7 @@ class Font
 
     /**
      * @param int $char  character code
-     * @return \SplFixedArray
+     * @return array
      */
     public function getPixelsForCharacter($char)
     {

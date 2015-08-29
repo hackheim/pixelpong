@@ -33,7 +33,7 @@ class FontLoader
                 if ($charLine[$i] == $font_meta->blankChar) {
                     continue;
                 }
-                $pixels = \SplFixedArray::fromArray(array_fill(0, $char_pixels, Font::BG));
+                $pixels = array_fill(0, $char_pixels, Font::BG);
                 for ($y = 0; $y < $font_meta->height; ++$y) {
                     for ($x = 0; $x < $font_meta->width; ++$x) {
                         if (imagecolorat($image, $ox + $x, $oy + $y) == $pixel_color) {

@@ -105,7 +105,7 @@ class BitmapLoader
             $lines[] = $line;
         }
         $height = count($lines);
-        $pixels = \SplFixedArray::fromArray(array_fill(0, $width * $height, Color::TRANSPARENT));
+        $pixels = array_fill(0, $width * $height, Color::TRANSPARENT);
         foreach ($lines as $y => $line) {
             $max_x = min($width, strlen($line));
             for ($x = 0; $x < $max_x; ++$x) {

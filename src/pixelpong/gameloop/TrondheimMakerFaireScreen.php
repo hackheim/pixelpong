@@ -11,7 +11,7 @@ class TrondheimMakerFaireScreen implements GameLoop
     /** @var FrameBuffer */
     private $frameBuffer;
 
-    /** @var \SplFixedArray[] */
+    /** @var array[] */
     private $frames;
 
     /** @var int */

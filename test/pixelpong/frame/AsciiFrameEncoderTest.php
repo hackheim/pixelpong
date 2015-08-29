@@ -26,7 +26,7 @@ class AsciiFrameEncoderTest extends \PHPUnit_Framework_TestCase
     public function testEncodeFrame()
     {
         $num_pixels = self::TEST_WIDTH * self::TEST_HEIGHT;
-        $frame = \SplFixedArray::fromArray(array_fill(0, $num_pixels, 0));
+        $frame = array_fill(0, $num_pixels, 0);
         $set_pixels = [2 => 2, 3 => 3, 9 => 10, 10 => 11];
         $expected = self::TEST_BLANK_ENCODED;
         foreach ($set_pixels as $sp => $ep) {

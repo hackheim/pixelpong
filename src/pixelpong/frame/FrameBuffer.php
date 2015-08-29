@@ -20,12 +20,12 @@ interface FrameBuffer
     public function setPixel($x, $y, $color);
 
     /**
-     * @return \SplFixedArray  a fixed-size array, the index of each pixel being (y*width)+x
+     * @return array  a fixed-size array, the index of each pixel being (y*width)+x
      */
     public function getFrame();
 
     /**
-     * @return \SplFixedArray  a fixed-size array, the index of each pixel being (y*width)+x
+     * @return array  a fixed-size array, the index of each pixel being (y*width)+x
      */
     public function getAndSwitchFrame();
 
@@ -33,10 +33,10 @@ interface FrameBuffer
      * Set the background frame, which is the one the frame buffer reverts to for every
      * game loop.
      *
-     * @param \SplFixedArray $frame
+     * @param array $frame
      * @return mixed
      */
-    public function setBackgroundFrame(\SplFixedArray $frame);
+    public function setBackgroundFrame(array $frame);
 
     /**
      * @param Bitmap $bitmap

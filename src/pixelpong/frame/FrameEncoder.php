@@ -7,10 +7,10 @@ interface FrameEncoder
     const PIXEL_BG = 0;
 
     /**
-     * @param \SplFixedArray $frame
+     * @param array $frame
      * @return string
      */
-    public function encodeFrame(\SplFixedArray $frame);
+    public function encodeFrame(array $frame);
 
     /**
      * @param FrameBuffer $frameBuffer

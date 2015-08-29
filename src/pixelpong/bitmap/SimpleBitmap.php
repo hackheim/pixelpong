@@ -10,15 +10,15 @@ class SimpleBitmap implements Bitmap
     /** @var int */
     protected $height;
 
-    /** @var \SplFixedArray */
+    /** @var array */
     protected $pixels;
 
     /**
      * @param int $width
      * @param int $height
-     * @param \SplFixedArray $pixels
+     * @param array $pixels
      */
-    public function __construct($width, $height, \SplFixedArray $pixels)
+    public function __construct($width, $height, array $pixels)
     {
         $this->width = $width;
         $this->height = $height;
@@ -42,7 +42,7 @@ class SimpleBitmap implements Bitmap
     }
 
     /**
-     * @return \SplFixedArray
+     * @return array
      */
     public function getPixels()
     {

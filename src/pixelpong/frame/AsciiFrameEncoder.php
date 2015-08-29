@@ -32,7 +32,7 @@ class AsciiFrameEncoder implements FrameEncoder
         $this->colorCharMap = array_flip(BitmapLoader::$colorMap);
     }
 
-    public function encodeFrame(\SplFixedArray $frame)
+    public function encodeFrame(array $frame)
     {
         $pixels = $this->blankEncodedFrame;
         for ($y = 0; $y < $this->height; ++$y) {

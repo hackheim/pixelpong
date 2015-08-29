@@ -18,7 +18,7 @@ class OffscreenFrameBufferTest extends \PHPUnit_Framework_TestCase
 
     public function testConstructor()
     {
-        $empty = \SplFixedArray::fromArray(array_fill(0, self::WIDTH * self::HEIGHT, 0));
+        $empty = array_fill(0, self::WIDTH * self::HEIGHT, 0);
         $this->assertEquals($empty, $this->ofb->getFrame());
         $this->assertEquals(self::WIDTH, $this->ofb->getWidth());
         $this->assertEquals(self::HEIGHT, $this->ofb->getHeight());

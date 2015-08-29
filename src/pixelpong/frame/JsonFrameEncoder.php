@@ -20,14 +20,14 @@ class JsonFrameEncoder implements FrameEncoder
         $this->width = $frameBuffer->getWidth();
         $this->height = $frameBuffer->getHeight();
         $size = $this->width * $this->height;
-        $this->blankEncodedFrame = \SplFixedArray::fromArray(array_fill(0, $size, self::COLOR_BG));
+        $this->blankEncodedFrame = array_fill(0, $size, self::COLOR_BG);
     }
 
     /**
-     * @param \SplFixedArray $frame
+     * @param array $frame
      * @return string
      */
-    public function encodeFrame(\SplFixedArray $frame)
+    public function encodeFrame(array $frame)
     {
         $pixels = [];
         foreach ($frame as $ix => $color) {

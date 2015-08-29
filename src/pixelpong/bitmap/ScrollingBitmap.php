@@ -21,7 +21,7 @@ class ScrollingBitmap implements Bitmap
     /** @var int */
     protected $yOffset;
 
-    /** @var \SplFixedArray */
+    /** @var array */
     protected $blankPixels;
 
     public function __construct(Bitmap $bitmap, $width, $height, $xOffset=0, $yOffset=0)
@@ -31,7 +31,7 @@ class ScrollingBitmap implements Bitmap
         $this->height = $height;
         $this->xOffset = $xOffset;
         $this->yOffset = $yOffset;
-        $this->blankPixels = \SplFixedArray::fromArray(array_fill(0, $width * $height, Color::TRANSPARENT));
+        $this->blankPixels = array_fill(0, $width * $height, Color::TRANSPARENT);
     }
 
     /**
@@ -59,14 +59,14 @@ class ScrollingBitmap implements Bitmap
     }
 
     /**
-     * @return \SplFixedArray
+     * @return array
      */
     public function getPixels()
     {
         $origw = $this->bitmap->getWidth();
         $origh = $this->bitmap->getHeight();
         $origpixels = $this->bitmap->getPixels();
-        $pixels = clone $this->blankPixels;
+        $pixels = $this->blankPixels;
         $maxx = min($this->width, $origw - $this->xOffset);
         $maxy = min($this->height, $origh - $this->yOffset);
         for ($y = 0; $y < $maxy; ++$y) {
