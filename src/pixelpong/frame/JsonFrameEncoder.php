@@ -35,7 +35,7 @@ class JsonFrameEncoder implements FrameEncoder
     {
         $pixels = [];
         $diff = array_diff_assoc($frame, $this->previousFrame);
-        $this->previousFrame = $frame;
+//        $this->previousFrame = $frame;
         if (count($diff) == 0) {
             return null;
         }
